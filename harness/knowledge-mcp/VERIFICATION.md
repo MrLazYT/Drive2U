@@ -1,9 +1,17 @@
+# Перевірка 1.2.0 — 2026-10-23
+
+24 passed, Linux/Python 3.12. Додані два регресійні тести:
+успадкований stdout дочірнього процесу не затримує успішний виклик;
+тайм-аут git завершує POSIX-групу процесів і повертає GIT_TIMEOUT:fetch.
+Windows taskkill не перевірений цими POSIX-тестами. Реальний GitHub fetch/push
+через Codex підтверджено окремим прийманням нижче.
+
 # Перевірка 1.1.0 — 2026-10-23
 
 22 passed на Linux/Python 3.12, включно з реальним MCP/STDIO.
 Додаткові регресійні перевірки: health/get/search працюють при зайнятому writer lock;
-health/get/search не викликають git. Windows/Codex acceptance ще потребує запуску
-на комп’ютері користувача. Протокол у Windows уже підтверджений користувачем;
+health/get/search не викликають git. Приймання Windows/Codex для версії 1.2.0
+зафіксовано нижче. Протокол у Windows уже підтверджений користувачем;
 попередня реалізація health повертала VAULT_BUSY.
 
 # Перевірка Knowledge MCP
@@ -21,17 +29,52 @@ python -m pytest harness/knowledge-mcp/tests -q
 
 Транспортний тест реально запускав server.py як STDIO-процес через MCP Python ClientSession, виконував initialize/list_tools/health_check, три ingestion зі штучними подіями, повтори, retrieval і заборонений шлях. Зміни опубліковані в одноразовий локальний bare git remote. Це протокольна інтеграційна перевірка, не демонстрація викликів вашим Codex у VS Code й не публікація у ваш GitHub.
 
-## Приймання у власному середовищі — заповнити після виконання
+## Приймання через Codex — 2026-10-24
+
+Локально на Windows/Python 3.13 виконано:
+`harness/knowledge-mcp/.venv/Scripts/python.exe -m pytest harness/knowledge-mcp/tests -q`.
+Результат: **21 passed, 3 skipped** за 61.96 с. Два POSIX-тести
+керування процесами та перевірка symlink пропущені на Windows;
+це не підтверджує роботу Windows taskkill при тайм-ауті.
+
+Версія конектора: **1.2.0**. Через Codex перевірені `health_check`, `get_note`,
+`search_notes`, `ingest_note`, а також commit і push, які виконує knowledge MCP.
+GitHub MCP працює в режимі лише читання; запис до vault виконувався тільки
+через `drive2u_knowledge.ingest_note` за явним дозволом користувача.
 
 | Перевірка | Фактичний результат / commit |
 |---|---|
-| Codex бачить drive2u_knowledge та чотири інструменти | Не виконано в цьому середовищі |
-| get_note читає Concepts/Ride.md через MCP | Не виконано в цьому середовищі |
-| ingest_note для першої реальної зміни | Не виконано в цьому середовищі |
-| ingest_note для другої реальної зміни | Не виконано в цьому середовищі |
-| ingest_note для третьої реальної зміни | Не виконано в цьому середовищі |
-| Повтор запиту: unchanged, той самий commit | Не виконано в цьому середовищі |
-| Нотатки та MOC доступні на GitHub | Не виконано в цьому середовищі |
-| Офіційний GitHub MCP читає 2–3 реальні зміни | Налаштовується окремо |
+| Codex бачить drive2u_knowledge та чотири інструменти | Підтверджені health_check, get_note, search_notes, ingest_note |
+| Читання через get_note | Прочитані Conventions.md, обидві Change-нотатки та MOC-Drive2U.md |
+| ingest_note для першої реальної зміни | Components/Change-236eea02af6c.md: created, published=true |
+| ingest_note для другої реальної зміни | Components/Change-c088c2027139.md: created, published=true |
+| ingest_note для третьої реальної зміни | Не входить у цей ланцюжок із двох комітів |
+| Повтор запитів із точно тими самими аргументами | Обидва unchanged, published=true; додаткових комітів немає |
+| Публікація нотаток та оновлення MOC | Обидва push підтверджені published=true; посилання MOC прочитані через get_note |
+| GitHub MCP читає реальні зміни | list_commits і get_commit: обидва коміти MrLazYT/Drive2U, повні diff і списки файлів |
 
-Додайте назви фактично викликаних інструментів, результати, SHA та спостереження. Не зберігайте токени й персональні дані. Наявність автоматизованих тестів не замінює цей крок.
+### Ланцюжок GitHub MCP → knowledge MCP
+
+Через `drive2u_github.list_commits` отримано обидва коміти, через
+`drive2u_github.get_commit` — їхні деталі з `detail=full_patch`, `perPage=100`.
+Списки з 13 та 3 файлів повністю вмістилися на перших сторінках;
+додаткові сторінки не потрібні. Через `drive2u_knowledge.get_note` прочитано
+Conventions.md, через `search_notes` перевірено пов’язані нотатки.
+
+| Коміт Drive2U | Повідомлення / дата UTC | Нотатка | Коміт vault |
+|---|---|---|---|
+| 236eea02af6c70df0240091503c7e02f79a4ba78 | added knowledge_mcp / 2026-10-23T13:42:04Z | Components/Change-236eea02af6c.md | 88e5c8a2bc28c29ea27e904df3471066740f25ee |
+| c088c202713956dca588ab82adcdf17e06adb986 | init / 2026-10-22T14:37:20Z | Components/Change-c088c2027139.md | ac6c41cc086f4bb19b164947ee82aa471cbe686f |
+
+Для кожної нотатки `ingest_note` повернув `created`, `published=true`.
+Після створення обох повторено кожен виклик із точно тими самими аргументами:
+обидва повернули `unchanged`, `published=true`, поточний HEAD
+`ac6c41cc086f4bb19b164947ee82aa471cbe686f`. Перший коміт vault відрізняється
+від цього HEAD, бо між створенням першої нотатки та повторами створено другу;
+самі повтори нових комітів не створили.
+
+Обидві нотатки прочитані через `get_note`: підтверджено повні SHA джерел,
+type=component, status=active, URL комітів у source та посилання на
+Knowledge-Connector і Conventions. MOC містить обидві Change-нотатки.
+Це перевірка інтеграції та публікації; тести коду застосунку під час цього
+ланцюжка не запускалися.

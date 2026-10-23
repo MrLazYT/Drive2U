@@ -1,0 +1,11 @@
+# Append to your existing Codex config.toml; do not replace it.
+# Set DRIVE2U_GITHUB_TOKEN in the environment inherited by Codex.
+# Never put the token value in this file. Use a token with read-only repository access.
+# Codex MCP settings: https://learn.chatgpt.com/docs/extend/mcp
+[mcp_servers.drive2u_github]
+url = "https://api.githubcopilot.com/mcp/"
+bearer_token_env_var = "DRIVE2U_GITHUB_TOKEN"
+http_headers = { "X-MCP-Readonly" = "true" }
+enabled_tools = ["list_commits", "get_commit"]
+startup_timeout_sec = 30
+tool_timeout_sec = 60

@@ -164,3 +164,38 @@ def test_health_and_reads_do_not_run_git(setup,monkeypatch):
     assert v.health()['ok']
     assert v.get('Concepts/Ride.md')['note_id']=='Concepts/Ride.md'
     assert v.search('Ride')['total']==2
+
+
+def test_git_does_not_wait_for_inherited_stdout(setup,monkeypatch):
+    import knowledge
+    import time,os,signal
+    if os.name=='nt':pytest.skip('POSIX process-group cleanup fixture')
+    v,_=setup;actual=subprocess.Popen;created=[]
+    code="import subprocess,sys; subprocess.Popen([sys.executable,'-c','import time; time.sleep(10)']); print('ok',flush=True)"
+    def launch(*args,**kwargs):
+        proc=actual([sys.executable,'-c',code],**kwargs);created.append(proc);return proc
+    monkeypatch.setattr(knowledge.subprocess,'Popen',launch)
+    try:
+        start=time.monotonic()
+        assert v.git('status')=='ok'
+        assert time.monotonic()-start<3
+    finally:
+        for proc in created:
+            try:os.killpg(proc.pid,signal.SIGKILL)
+            except ProcessLookupError:pass
+
+
+def test_git_timeout_kills_descendants(setup,monkeypatch):
+    import knowledge
+    import time,os
+    if os.name=='nt':pytest.skip('POSIX process-group fixture; Windows taskkill needs Windows acceptance')
+    v,_=setup;actual=subprocess.Popen
+    class ShortWait(actual):
+        def wait(self,timeout=None):
+            return super().wait(timeout=min(timeout,0.2) if timeout else timeout)
+    code="import subprocess,sys,time; subprocess.Popen([sys.executable,'-c','import time; time.sleep(60)']); time.sleep(60)"
+    def launch(*args,**kwargs):return ShortWait([sys.executable,'-c',code],**kwargs)
+    monkeypatch.setattr(knowledge.subprocess,'Popen',launch)
+    start=time.monotonic()
+    with pytest.raises(KnowledgeError,match='GIT_TIMEOUT:fetch'):v.git('fetch','origin')
+    assert time.monotonic()-start<3

@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import re
 import subprocess
+import signal
 import tempfile
 from datetime import date
 from filelock import FileLock, Timeout
@@ -61,16 +62,47 @@ class Vault:
 
     @staticmethod
     def git_at(root: Path, *args: str) -> str:
+        # Pipes inherited by SSH/credential-helper grandchildren can keep communicate()
+        # waiting after the parent git has timed out. Use files, wait(), and kill tree.
         env = dict(os.environ, GIT_TERMINAL_PROMPT='0', GCM_INTERACTIVE='Never')
-        try:
-            p = subprocess.run([os.environ.get('KNOWLEDGE_GIT_EXE', 'git'), '-C', str(root), *args], capture_output=True,
-                               text=True, encoding='utf-8', errors='replace',
-                               timeout=10, env=env, shell=False)
-        except (subprocess.TimeoutExpired, OSError):
-            raise KnowledgeError('GIT_UNAVAILABLE_OR_TIMEOUT') from None
-        if p.returncode:
-            raise KnowledgeError('GIT_COMMAND_FAILED:' + args[0])
-        return p.stdout.strip()
+        executable = os.environ.get('KNOWLEDGE_GIT_EXE', 'git')
+        command = [executable, '-C', str(root), *args]
+        timeout = 15 if args[0] in {'fetch', 'push'} else 5
+        options = ({'creationflags': subprocess.CREATE_NEW_PROCESS_GROUP}
+                   if os.name == 'nt' else {'start_new_session': True})
+        with tempfile.TemporaryFile() as output:
+            try:
+                process = subprocess.Popen(command, stdin=subprocess.DEVNULL,
+                    stdout=output, stderr=subprocess.DEVNULL, env=env, shell=False,
+                    **options)
+            except OSError:
+                raise KnowledgeError('GIT_EXECUTABLE_UNAVAILABLE') from None
+            try:
+                process.wait(timeout=timeout)
+            except subprocess.TimeoutExpired:
+                if os.name == 'nt':
+                    try:
+                        subprocess.run(['taskkill.exe', '/PID', str(process.pid), '/T', '/F'],
+                            stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL, timeout=3, shell=False)
+                    except (OSError, subprocess.TimeoutExpired):
+                        pass
+                else:
+                    try:
+                        os.killpg(process.pid, signal.SIGKILL)
+                    except ProcessLookupError:
+                        pass
+                if process.poll() is None:
+                    process.kill()
+                try:
+                    process.wait(timeout=2)
+                except subprocess.TimeoutExpired:
+                    pass
+                raise KnowledgeError('GIT_TIMEOUT:' + args[0]) from None
+            if process.returncode:
+                raise KnowledgeError('GIT_COMMAND_FAILED:' + args[0])
+            output.seek(0)
+            return output.read().decode('utf-8', errors='replace').strip()
 
     def git(self, *args):
         return self.git_at(self.root, *args)
@@ -144,7 +176,7 @@ class Vault:
             busy = True
         else:
             self.lock.release()
-        return {'ok': True, 'version': '1.1.0', 'write_enabled': self.write_enabled,
+        return {'ok': True, 'version': '1.2.0', 'write_enabled': self.write_enabled,
                 'writer_busy': busy, 'pending_push': self.pending.exists(),
                 'note_count': len(list(self.note_ids())),
                 'dirty': None, 'git_status': 'not_checked_by_health',
