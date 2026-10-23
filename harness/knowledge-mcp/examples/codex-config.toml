@@ -1,0 +1,15 @@
+# Append to your existing %USERPROFILE%/.codex/config.toml; do not replace it.
+# Replace C:/Projects with the actual parent directory. Forward slashes work in TOML on Windows.
+[mcp_servers.drive2u_knowledge]
+command = "C:/Projects/drive2u/harness/knowledge-mcp/.venv/Scripts/python.exe"
+args = ["C:/Projects/drive2u/harness/knowledge-mcp/server.py"]
+startup_timeout_sec = 30
+tool_timeout_sec = 300
+default_tools_approval_mode = "writes"
+enabled_tools = ["health_check", "get_note", "search_notes", "ingest_note"]
+
+[mcp_servers.drive2u_knowledge.env]
+DRIVE2U_APP_ROOT = "C:/Projects/drive2u"
+DRIVE2U_VAULT_ROOT = "C:/Projects/drive2u-knowledge"
+KNOWLEDGE_ALLOW_WRITE = "0"
+PYTHONUTF8 = "1"
