@@ -1,0 +1,168 @@
+{
+  "role": "planner",
+  "agent_id": "/root/planner",
+  "goal": "ASP.NET Core API і незалежний decimal-калькулятор з xUnit/HTTP тестами",
+  "scope": [
+    "global.json SDK 10.0.301, rollForward=disable, allowPrerelease=false; net10.0",
+    "server/Drive2U.slnx; Drive2U.Fares; Drive2U.Api; Drive2U.Tests; README",
+    "GET /health => 200 {status:ok}",
+    "POST /api/fare-estimates application/json {distanceKm:2.5} => 200 {distanceKm:2.5,amount:70,currency:UAH} за тарифу 40/12",
+    "Невідомі поля тарифу/валюти/суми відхиляти 400; malformed/missing/null/invalid/out-of-range/overflow => 400 ProblemDetails",
+    "Demo estimate на недовіреній відстані; без Fare-Quote/quoteId/expiry/orders; FR-03 не завершений"
+  ],
+  "acceptance_criteria": [
+    "AC01: SDK/net10.0 pin; exact stable NuGet versions і packages.lock.json",
+    "AC02: decimal формула, одне Math.Round(...,2,AwayFromZero) у кінці",
+    "AC03: 40 + 2.5 * 12 = 70 UAH",
+    "AC04: 1.005 -> 1.01; 0.004+1*0.004 ->0.01 (без округлення доданків)",
+    "AC05: distance<=0 invalid; negative tariffs invalid; zero tariff allowed",
+    "AC06: missing section/key, nonnumeric/negative tariff fail startup before ready",
+    "AC07: HTTP health/estimate 200; лише distanceKm/amount/currency",
+    "AC08: absent/null body,{},null/text/malformed/zero/negative distance =>400 problem JSON",
+    "AC09: baseFare/ratePerKm/currency/amount request =>400; next clean request uses original server tariff",
+    "AC10: outside decimal + multiplication/addition overflow =>400 without exception details; library tests",
+    "AC11: restore, Release build/test фактичні команди/exit/test counts",
+    "AC12: loopback live health/estimate із config tariff; shutdown власного процесу",
+    "AC13: README demo boundary, future integrations, configuration examples not market tariffs",
+    "AC14: sequential distinct agents and complete handoffs",
+    "AC15: independent drive2u-review; repeat Coder/Reviewer only for findings",
+    "AC16: post-acceptance sync Backend-API or record INVALID_YAML blocker"
+  ],
+  "initial_sha": "0a5b3ac6e833619f07239ddd4eaf8cad1d27d653",
+  "sources": [
+    {
+      "path": "ЗАВДАННЯ.md",
+      "revision": "0a5b3ac6e833619f07239ddd4eaf8cad1d27d653",
+      "result": "прочитано Planner"
+    },
+    {
+      "path": "docs/app-requirements.md",
+      "revision": "0a5b3ac6e833619f07239ddd4eaf8cad1d27d653",
+      "result": "прочитано Planner"
+    },
+    {
+      "path": "docs/harness-requirements.md",
+      "revision": "0a5b3ac6e833619f07239ddd4eaf8cad1d27d653",
+      "result": "прочитано Planner"
+    },
+    {
+      "path": "docs/ontology.md",
+      "revision": "0a5b3ac6e833619f07239ddd4eaf8cad1d27d653",
+      "result": "прочитано Planner"
+    },
+    {
+      "path": "docs/guardrails.md",
+      "revision": "0a5b3ac6e833619f07239ddd4eaf8cad1d27d653",
+      "result": "прочитано Planner"
+    },
+    {
+      "path": "docs/skills.md",
+      "revision": "0a5b3ac6e833619f07239ddd4eaf8cad1d27d653",
+      "result": "прочитано Planner"
+    },
+    {
+      "path": ".agents/skills/drive2u-review/SKILL.md",
+      "revision": "0a5b3ac6e833619f07239ddd4eaf8cad1d27d653",
+      "result": "прочитано Planner"
+    },
+    {
+      "path": ".agents/skills/drive2u-sync-knowledge/SKILL.md",
+      "revision": "0a5b3ac6e833619f07239ddd4eaf8cad1d27d653",
+      "result": "прочитано Planner"
+    },
+    {
+      "note_id": "Components/Backend-API.md",
+      "revision": "496beff9611b6b4b53dcd64eb296647dd05031c80f4a4f0c928f87f8684ba174",
+      "result": "search_notes found; get_note INVALID_YAML"
+    },
+    {
+      "note_id": "Concepts/Fare-Quote.md",
+      "revision": "88414eb06f1e3070122e07ff54f27ef804904edc446dfe4d6b3d65f36368aba1",
+      "result": "search_notes found; get_note INVALID_YAML"
+    },
+    {
+      "note_id": "Concepts/Route.md",
+      "revision": "610431d2ef5c12ee7db70cbaa35850558077a3cd62c3474b2f591086780cdd48",
+      "result": "search_notes found; get_note INVALID_YAML"
+    },
+    {
+      "note_id": "Decisions/ADR-001-Technology-Stack.md",
+      "revision": "eef650b439ca3152f90e828e51db344d121f03449d034319c9a393a7be2e2d1a",
+      "result": "search_notes found; get_note INVALID_YAML"
+    },
+    {
+      "note_id": "Decisions/ADR-002-Server-Authority.md",
+      "revision": "135812b2c0ce01d9f15eadf615c97d249ebc5078fd7cb76c3104727c7f9c85ed",
+      "result": "search_notes found; get_note INVALID_YAML"
+    }
+  ],
+  "confirmed_facts": [
+    "Planner самостійно підтвердив branch/HEAD; Test-Path server=False; csproj/solution/global.json відсутні",
+    "Planner не змінював файлів; потрібний handoff координатор зберіг у стислому вигляді без зміни рішень",
+    "П’ять get_note INVALID_YAML; search_notes лише підтверджує існування/ревізії",
+    "SDK 10.0.301 встановлений; .NET10 LTS підтверджено coordinator офіційною policy; installed runtime10.0.9 відстає від10.0.13"
+  ],
+  "decisions": [
+    {
+      "decision": "Три проєкти Fares, Api, Tests; MVC ApiController; nullable decimal DTO+Required; strict number handling і disallow unknown JSON",
+      "rationale": "Проста структура і стандартний pipeline ProblemDetails без зайвих шарів"
+    },
+    {
+      "decision": "Immutable tariff із валідацією; nullable config fields і ValidateOnStart; constant UAH",
+      "rationale": "Missing config не перетворюється на нуль; request не контролює тариф"
+    },
+    {
+      "decision": "Checked decimal, safe overflow mapping; WebApplicationFactory HTTP tests",
+      "rationale": "Перевірка справжнього HTTP pipeline та стабільних помилок"
+    },
+    {
+      "decision": "Приклад конфігурації BaseFare40/RatePerKm12; exact stable test-only NuGet і lockfiles",
+      "rationale": "Відтворюваний приклад без заяв про ринок"
+    },
+    {
+      "decision": "Вимоги не редагувати, FR03 boundary документувати",
+      "rationale": "Demo не підміняє довірений Fare-Quote"
+    }
+  ],
+  "allowed_changes": [
+    "global.json",
+    "server/**",
+    ".gitignore точні server bin/obj/TestResults правила",
+    "harness/orchestration/**",
+    "docs/orchestration/backend-fare/**",
+    "project restore/build/test/local run"
+  ],
+  "forbidden_changes": [
+    "hooks/MCP/global config/knowledge-mcp/parse_note",
+    "mobile/maps/geocoding/routing/Identity/DB/SignalR/orders/Fare-Quote",
+    "сторонні файли, reset/stash/force push/main merge",
+    "vault filesystem access, system installs, generated artifacts in commit"
+  ],
+  "changed_files": [],
+  "checks": [
+    {
+      "command": "git branch --show-current; git rev-parse HEAD",
+      "result": "feat/backend-fare-orchestration; 0a5b3ac6e833619f07239ddd4eaf8cad1d27d653"
+    },
+    {
+      "command": "rg --files -g AGENTS.md -g '*.csproj' -g '*.sln*' -g global.json; Test-Path server",
+      "result": "no matches; False"
+    },
+    {
+      "command": "search_notes Backend-API/Fare-Quote/Route/ADR001/ADR002",
+      "result": "усі знайдені; YAML повністю не прочитаний"
+    },
+    {
+      "command": "restore/build/test/live API",
+      "result": "не виконувались Planner; передано Coder"
+    }
+  ],
+  "risks": [
+    "INVALID_YAML блокує sync; не переписувати наосліп",
+    "SDK/runtime servicing відстає; без системних інсталяцій",
+    "restore may need escalation; sandbox setup failure не hook-deny",
+    "не production API без auth/trusted routing"
+  ],
+  "open_questions": [],
+  "next_action": "Coder реалізує прийнятий план і повертає фактичні докази, потім Reviewer"
+}

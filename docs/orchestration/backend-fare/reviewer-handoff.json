@@ -1,0 +1,184 @@
+{
+  "role": "reviewer",
+  "agent_id": "/root/reviewer",
+  "outcome": "accepted",
+  "goal": "Незалежно перевірити перший серверний етап Drive2U через drive2u-review без зміни предмета",
+  "scope": [
+    "Staged diff від HEAD 0a5b3ac6e833619f07239ddd4eaf8cad1d27d653 у feat/backend-fare-orchestration: .gitignore, global.json, server/**, harness/orchestration/**, docs/orchestration/backend-fare/**",
+    "Код, тести, конфігурація, lockfiles, README, схема та Planner/Coder handoffs; сторонні локальні зміни поза предметом"
+  ],
+  "acceptance_criteria": [
+    "AC01–AC13 підтверджено читанням коду/тестів/README і незалежним locked restore/build/test; live smoke — перевірений Coder evidence, не повторювався Reviewer",
+    "AC14: окремі послідовні Planner/Coder/Reviewer, релевантні handoffs з початковим SHA і note revisions; рольові інструкції не названі технічною ізоляцією",
+    "AC15: drive2u-review застосовано незалежним Reviewer; нових знахідок немає, повернення до Coder не потрібне",
+    "AC16: sync Backend-API належить coordinator після цього приймання; INVALID_YAML залишається блокером, не вважається реалізованим оновленням знань"
+  ],
+  "initial_sha": "0a5b3ac6e833619f07239ddd4eaf8cad1d27d653",
+  "sources": [
+    {
+      "path": "ЗАВДАННЯ.md",
+      "revision": "0a5b3ac6e833619f07239ddd4eaf8cad1d27d653",
+      "result": "прочитано Reviewer"
+    },
+    {
+      "path": "docs/app-requirements.md",
+      "revision": "0a5b3ac6e833619f07239ddd4eaf8cad1d27d653",
+      "result": "прочитано Reviewer"
+    },
+    {
+      "path": "docs/harness-requirements.md",
+      "revision": "0a5b3ac6e833619f07239ddd4eaf8cad1d27d653",
+      "result": "прочитано Reviewer"
+    },
+    {
+      "path": "docs/ontology.md",
+      "revision": "0a5b3ac6e833619f07239ddd4eaf8cad1d27d653",
+      "result": "прочитано Reviewer"
+    },
+    {
+      "path": "docs/guardrails.md",
+      "revision": "0a5b3ac6e833619f07239ddd4eaf8cad1d27d653",
+      "result": "прочитано Reviewer"
+    },
+    {
+      "path": ".agents/skills/drive2u-review/SKILL.md",
+      "revision": "0a5b3ac6e833619f07239ddd4eaf8cad1d27d653",
+      "result": "прочитано Reviewer"
+    },
+    {
+      "path": "docs/orchestration/backend-fare/task.md; planner-handoff.json; coder-handoff.json; transcript.md; verification.md",
+      "revision": "staged working tree based on initial_sha",
+      "result": "контекст і докази ролей перевірено; coordinator фіналізує AC15/16 після handoff"
+    },
+    {
+      "path": "server/**; global.json; .gitignore; harness/orchestration/**",
+      "revision": "staged diff hash 54599b11d22e83d32f2283cb193621519d1cb945",
+      "result": "предмет перевірено; hash до/після однаковий; unstaged diff цих шляхів порожній"
+    },
+    {
+      "note_id": "Conventions.md",
+      "revision": "b76b8bd81aa1b01de2d3ac549dee6cc861891f84092423884a9d114e81d580e1",
+      "result": "get_note успішний; metadata/typed-relations conventions"
+    },
+    {
+      "note_id": "Components/Knowledge-Connector.md",
+      "revision": "7a8dbb9972255daa2645700e399f0a0a71210b6ed99699cd3220990e73236664",
+      "result": "get_note успішний; відомий INVALID_YAML не обходити"
+    },
+    {
+      "note_id": "Components/Backend-API.md",
+      "revision": "496beff9611b6b4b53dcd64eb296647dd05031c80f4a4f0c928f87f8684ba174",
+      "result": "search_notes і inherited provenance підтверджують revision; незалежний get_note INVALID_YAML"
+    },
+    {
+      "note_id": "Concepts/Fare-Quote.md",
+      "revision": "88414eb06f1e3070122e07ff54f27ef804904edc446dfe4d6b3d65f36368aba1",
+      "result": "search_notes підтвердив revision/уривок; get_note INVALID_YAML"
+    },
+    {
+      "note_id": "Concepts/Route.md",
+      "revision": "610431d2ef5c12ee7db70cbaa35850558077a3cd62c3474b2f591086780cdd48",
+      "result": "search_notes підтвердив revision/уривок; get_note INVALID_YAML"
+    },
+    {
+      "note_id": "Decisions/ADR-001-Technology-Stack.md",
+      "revision": "eef650b439ca3152f90e828e51db344d121f03449d034319c9a393a7be2e2d1a",
+      "result": "revision успадкована з handoff; незалежний get_note INVALID_YAML; повне тіло недоступне"
+    },
+    {
+      "note_id": "Decisions/ADR-002-Server-Authority.md",
+      "revision": "135812b2c0ce01d9f15eadf615c97d249ebc5078fd7cb76c3104727c7f9c85ed",
+      "result": "search_notes підтвердив revision/уривок; get_note INVALID_YAML"
+    }
+  ],
+  "confirmed_facts": [
+    "Нових P1/P2/P3 знахідок немає; реалізацію прийнято в межах demo calculator, без заяв про production readiness чи виконання всього FR-03",
+    "Formula і всі грошові/дистанційні значення decimal; checked multiplication/addition; одне decimal.Round фінальної суми,2,AwayFromZero",
+    "Immutable FareTariff створюється лише із server options; nullable конфігураційні поля з ValidateOnStart виявляють missing/negative, binder виявляє malformed config",
+    "Strict JSON number handling, unknown-member rejection і API validation/overflow повертають safe400 application/problem+json; тести перевіряють збереження серверного тарифу після спроби override",
+    "Відсутні quoteId/expiry/order confirmation; README прямо пояснює недовірену відстань і наступні інтеграції",
+    "Незалежний locked restore успішний; Release build0warnings/0errors,37passed/0failed/0skipped",
+    "Операції API stateless, тариф immutable; DB/concurrency/retry/order atomicity не реалізуються і чесно позначені як наступні інтеграції",
+    "D2U-A001/A002/A003 виконані: локальні погоджені джерела, MCP-only vault, синтетичні HTTP/in-memory tests. W001/W003 мають дозвіл поточного запиту; W002/ADR не змінені; B001–B004 не порушені",
+    "Код/тести/hooks/MCP-конфігурацію Reviewer не редагував; лише reviewer-handoff як дозволений вихід ролі"
+  ],
+  "decisions": [
+    {
+      "decision": "accepted без Coder rework",
+      "rationale": "Немає підтверджених нових дефектів; усі перевірки реалізованого обсягу пройшли"
+    },
+    {
+      "decision": "Обмежити висновок локальними вимогами, кодом і доступним MCP-контекстом",
+      "rationale": "П’ять get_note повернули INVALID_YAML; filesystem bypass і blind rewrite заборонені"
+    },
+    {
+      "decision": "Не повторювати live smoke без нової підстави",
+      "rationale": "Coder зафіксував успішний localhost health/estimate і shutdown; скрипт прочитано, незалежний HTTP pipeline перевірено37 тестами"
+    }
+  ],
+  "allowed_changes": [
+    "Лише docs/orchestration/backend-fare/reviewer-handoff.json як вихід ролі",
+    "Read-only review та погоджені локальні restore/build/test"
+  ],
+  "forbidden_changes": [
+    "Редагування server коду/тестів або іншого предмета рев’ю",
+    "hooks/MCP/global config/knowledge-mcp/parse_note",
+    "Vault файловими або git-інструментами; ingestion у ролі Reviewer",
+    "commit/push/force push/reset/stash/main merge; сторонні файли"
+  ],
+  "changed_files": [
+    "docs/orchestration/backend-fare/reviewer-handoff.json"
+  ],
+  "checks": [
+    {
+      "command": "git branch --show-current; git rev-parse HEAD; git status --short; git diff --cached --stat/--numstat",
+      "result": "feat/backend-fare-orchestration; initial_sha;30 staged files, відомі сторонні зміни поза індексом; .pytest_cache warning не test failure"
+    },
+    {
+      "command": "rg --files -g AGENTS.md",
+      "result": "AGENTS.md у репозиторії не знайдено"
+    },
+    {
+      "command": "drive2u_knowledge.health_check",
+      "result": "ok,true;version1.3.0;write_enabledtrue;writer_busyfalse;pending_pushfalse;dirtynull,git_statusnot_checked_by_health"
+    },
+    {
+      "command": "get_note Conventions.md і Components/Knowledge-Connector.md; search_notes Fare-Quote limit20; get_note Backend-API/Fare-Quote/Route/ADR001/ADR002",
+      "result": "Conventions/Connector успішні з revisions у sources; п’ять цільовихget_note INVALID_YAML; обхід не виконувався"
+    },
+    {
+      "command": "dotnet restore server/Drive2U.slnx --locked-mode",
+      "result": "exit0; all projects up-to-date"
+    },
+    {
+      "command": "dotnet build server/Drive2U.slnx -c Release --no-restore",
+      "result": "exit0;0warnings/0errors;2.68s"
+    },
+    {
+      "command": "dotnet test server/Drive2U.slnx -c Release --no-build --no-restore",
+      "result": "exit0;37passed/0failed/0skipped;duration1s"
+    },
+    {
+      "command": "git diff --cached --check",
+      "result": "exit0"
+    },
+    {
+      "command": "git diff --cached --binary -- server global.json .gitignore harness/orchestration | git hash-object --stdin; git diff --exit-code -- server global.json .gitignore harness/orchestration (до/після)",
+      "result": "обидва hash54599b11d22e83d32f2283cb193621519d1cb945; unstaged diff порожній, предмет не редаговано"
+    },
+    {
+      "command": "live API smoke",
+      "result": "Reviewer повторно не запускав; Coder evidence: localhost5187/PID9156,healthok,2.5km->70UAH,SERVER_STOPPED=True"
+    }
+  ],
+  "risks": [
+    "Повні предметні/ADR MCP-нотатки недоступні через INVALID_YAML; sync Backend-API не може бути заявлений успішним без get_note",
+    "Встановлений runtime10.0.9 відстає від поточного servicing; це відоме задокументоване обмеження, системні зміни поза обсягом",
+    "Demo API не має auth/trusted routing/DB/SignalR/production hardening і не є Fare-Quote",
+    "Середовище shell потребує require_escalated через несправний sandbox helper; це не hook-deny",
+    "Coder повідомив автоматичну first-run development HTTPS certificate дію; Reviewer не виконував trust/delete"
+  ],
+  "open_questions": [],
+  "findings": [],
+  "next_action": "Coordinator приймає review, застосовує drive2u-sync-knowledge до Backend-API або фіксує INVALID_YAML blocker, фіналізує transcript/verification, перевіряє індекс і виконує погоджені commit/push."
+}

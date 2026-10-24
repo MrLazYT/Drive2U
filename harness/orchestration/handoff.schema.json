@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Drive2U role handoff",
+  "type": "object",
+  "required": [
+    "role",
+    "goal",
+    "scope",
+    "acceptance_criteria",
+    "initial_sha",
+    "sources",
+    "confirmed_facts",
+    "decisions",
+    "allowed_changes",
+    "forbidden_changes",
+    "changed_files",
+    "checks",
+    "risks",
+    "open_questions",
+    "next_action"
+  ],
+  "properties": {
+    "role": {
+      "enum": [
+        "planner",
+        "coder",
+        "reviewer"
+      ]
+    },
+    "goal": {
+      "type": "string"
+    },
+    "scope": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "acceptance_criteria": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "initial_sha": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "confirmed_facts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "decision",
+          "rationale"
+        ]
+      }
+    },
+    "allowed_changes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "forbidden_changes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "changed_files": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "command",
+          "result"
+        ]
+      }
+    },
+    "risks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "open_questions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_action": {
+      "type": "string"
+    },
+    "agent_id": {
+      "type": "string"
+    },
+    "outcome": {
+      "type": "string"
+    },
+    "findings": {
+      "type": "array"
+    }
+  }
+}

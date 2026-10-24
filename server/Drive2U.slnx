@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Drive2U.Api/Drive2U.Api.csproj" />
+  <Project Path="Drive2U.Fares/Drive2U.Fares.csproj" />
+  <Project Path="Drive2U.Tests/Drive2U.Tests.csproj" />
+</Solution>

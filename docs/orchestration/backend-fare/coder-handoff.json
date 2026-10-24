@@ -1,0 +1,197 @@
+{
+  "role": "coder",
+  "agent_id": "/root/coder",
+  "goal": "Реалізувати прийнятий Planner API/calculator етап і підтвердити business/HTTP/startup/live поведінку",
+  "scope": [
+    "net10.0 three projects: Fares, Api, Tests",
+    "GET /health; POST /api/fare-estimates strict decimal JSON",
+    "server-side validated immutable tariff, UAH, safe400 overflow",
+    "локальна demo distance не є Fare-Quote, повний FR03 не виконано"
+  ],
+  "acceptance_criteria": [
+    "AC01 SDK10.0.301 exact pin, stable net10.0, exact NuGet versions/lockfiles: done",
+    "AC02–AC05 decimal/formula/final rounding/positive distance/nonnegative tariff/zero tariff: 10 business test cases pass",
+    "AC06 missing section/keys, negative/nonnumeric tariff prevent startup: 7 test cases pass",
+    "AC07–AC10 health/estimate/error contract/server tariff/oversized input/arithmetic overflow:20 HTTP cases pass",
+    "AC11 restore/build/test complete; final37 passed/0 skipped",
+    "AC12 HTTP loopback health+estimate and own process stop complete",
+    "AC13 README documents examples/boundary/future integrations",
+    "AC14–AC16 orchestration/review/sync remain coordinator steps after this handoff"
+  ],
+  "initial_sha": "0a5b3ac6e833619f07239ddd4eaf8cad1d27d653",
+  "sources": [
+    {
+      "path": "docs/orchestration/backend-fare/planner-handoff.json",
+      "result": "accepted plan read; retained contract and constraints"
+    },
+    {
+      "path": "docs/orchestration/backend-fare/task.md",
+      "result": "read goal, scope, permissions, note blockers"
+    },
+    {
+      "path": "harness/orchestration/roles/coder.md",
+      "result": "read role ownership; no commits or other agents"
+    },
+    {
+      "path": "harness/orchestration/handoff.schema.json",
+      "result": "handoff structure read"
+    },
+    {
+      "note_id": "Components/Backend-API.md",
+      "revision": "496beff9611b6b4b53dcd64eb296647dd05031c80f4a4f0c928f87f8684ba174",
+      "result": "inherited Planner provenance; get_note INVALID_YAML; Coder did not bypass MCP"
+    },
+    {
+      "note_id": "Concepts/Fare-Quote.md",
+      "revision": "88414eb06f1e3070122e07ff54f27ef804904edc446dfe4d6b3d65f36368aba1",
+      "result": "inherited Planner provenance; full YAML unavailable"
+    },
+    {
+      "note_id": "Concepts/Route.md",
+      "revision": "610431d2ef5c12ee7db70cbaa35850558077a3cd62c3474b2f591086780cdd48",
+      "result": "inherited Planner provenance; full YAML unavailable"
+    },
+    {
+      "note_id": "Decisions/ADR-001-Technology-Stack.md",
+      "revision": "eef650b439ca3152f90e828e51db344d121f03449d034319c9a393a7be2e2d1a",
+      "result": "inherited Planner provenance; full YAML unavailable"
+    },
+    {
+      "note_id": "Decisions/ADR-002-Server-Authority.md",
+      "revision": "135812b2c0ce01d9f15eadf615c97d249ebc5078fd7cb76c3104727c7f9c85ed",
+      "result": "inherited Planner provenance; full YAML unavailable"
+    },
+    {
+      "url": "https://www.nuget.org/packages/xunit.v3/3.2.2",
+      "result": "official package supports net8+; selected maintained v3 rather than legacy xunit2"
+    },
+    {
+      "url": "https://www.nuget.org/packages/Microsoft.NET.Test.Sdk/17.14.1",
+      "result": "stable package confirmed"
+    },
+    {
+      "url": "https://www.nuget.org/packages/xunit.runner.visualstudio/3.1.4",
+      "result": "stable package confirmed"
+    },
+    {
+      "url": "https://www.nuget.org/packages/Microsoft.AspNetCore.Mvc.Testing/10.0.9",
+      "result": "web open internal error; exact version confirmed by successful NuGet restore and lockfile, compatible net10"
+    }
+  ],
+  "confirmed_facts": [
+    "Only owned files written; no commit/push, no other agents, no vault filesystem access",
+    "Final build0 warnings/errors;37 tests passed with production-environment HTTP hosts and explicit isolated test tariff",
+    "Live URLhttp://127.0.0.1:5187 PID9156; healthok; distance2.5 amount70 UAH; SERVER_STOPPED=True",
+    "Actual test count:10 business cases+27 HTTP/startup cases (7 startup,20 HTTP)",
+    "Initial dotnet first-run automatically installed development HTTPS certificate according to SDK output; no trust command or system tool installation performed",
+    "Server tariff immutable per host; unknown fields cannot override; ambient configuration cleared in test factory"
+  ],
+  "decisions": [
+    {
+      "decision": "Class DTO with nullable Required decimal and explicit Allow empty body",
+      "rationale": "Standard MVC validation plus safe400 for absent body; avoids record validation metadata mismatch found during tests"
+    },
+    {
+      "decision": "Strict JSON number handling and unknown-field rejection",
+      "rationale": "Request cannot specify tariff, amount, currency or string-numbers"
+    },
+    {
+      "decision": "Safe fixed validation messages in model binding and overflow boundary",
+      "rationale": "ProblemDetails excludes parser and exception implementation details"
+    },
+    {
+      "decision": "xunit.v3 3.2.2; MVC Testing10.0.9; Test SDK17.14.1; runner3.1.4",
+      "rationale": "Stable versions successfully restored on installed net10 SDK; all testing packages test-only"
+    },
+    {
+      "decision": "Loopback smoke script uses hidden own dotnet process and finally cleanup",
+      "rationale": "Repeatable live verification without lingering server"
+    }
+  ],
+  "allowed_changes": [
+    "global.json",
+    ".gitignore exact server generated-file rules",
+    "server/**",
+    "docs/orchestration/backend-fare/coder-handoff.json"
+  ],
+  "forbidden_changes": [
+    "hooks/MCP/global config/knowledge-mcp/parse_note",
+    "foreign local files/vault direct access",
+    "mobile/routing/Identity/DB/SignalR/orders/Fare-Quote",
+    "system installs/reset/stash/force push/main merge",
+    "transcript/verification and other root-owned files"
+  ],
+  "changed_files": [
+    "global.json",
+    ".gitignore",
+    "server/Directory.Build.props",
+    "server/Drive2U.slnx",
+    "server/Drive2U.Api/Drive2U.Api.csproj",
+    "server/Drive2U.Api/Program.cs",
+    "server/Drive2U.Api/FareTariffOptions.cs",
+    "server/Drive2U.Api/FareEstimatesController.cs",
+    "server/Drive2U.Api/appsettings.json",
+    "server/Drive2U.Api/packages.lock.json",
+    "server/Drive2U.Fares/Drive2U.Fares.csproj",
+    "server/Drive2U.Fares/FareTariff.cs",
+    "server/Drive2U.Fares/FareCalculator.cs",
+    "server/Drive2U.Fares/packages.lock.json",
+    "server/Drive2U.Tests/Drive2U.Tests.csproj",
+    "server/Drive2U.Tests/FareCalculatorTests.cs",
+    "server/Drive2U.Tests/FareApiTests.cs",
+    "server/Drive2U.Tests/packages.lock.json",
+    "server/scripts/smoke.ps1",
+    "server/README.md",
+    "docs/orchestration/backend-fare/coder-handoff.json"
+  ],
+  "checks": [
+    {
+      "command": "git status --short; Get-Content role/task/planner/schema; dotnet new xunit --help",
+      "result": "read context; no conflicting server files; SDK first-run certificate automatic side effect recorded"
+    },
+    {
+      "command": "dotnet restore server/Drive2U.slnx",
+      "result": "exit0; all3 projects restored; Tests6.34s"
+    },
+    {
+      "command": "dotnet build server/Drive2U.slnx -c Release --no-restore (first)",
+      "result": "failed CS1503 ValidationProblem overload; corrected to BadRequestObjectResult of ValidationProblemDetails. Subsequent no-build test source absent; not claimed as test result"
+    },
+    {
+      "command": "dotnet test server/Drive2U.slnx -c Release --no-build --no-restore (first executable suite)",
+      "result": "12 failed/25passed: record validation metadata500 and absent body415. Changed DTO to class and explicit empty-body binding; failures fixed, no checks disabled"
+    },
+    {
+      "command": "dotnet test server/Drive2U.slnx -c Release --no-restore --logger console;verbosity=minimal",
+      "result": "37passed,0failed/skipped; xUnit cancellation warnings then addressed via TestContext tokens"
+    },
+    {
+      "command": "dotnet build server/Drive2U.slnx -c Release --no-restore (final)",
+      "result": "exit0;0warnings/0errors;2.41s"
+    },
+    {
+      "command": "dotnet test server/Drive2U.slnx -c Release --no-build --no-restore (final)",
+      "result": "exit0;37passed,0failed,0skipped;duration1s"
+    },
+    {
+      "command": "& server/scripts/smoke.ps1",
+      "result": "exit0;URL=http://127.0.0.1:5187 PID9156;HEALTH={status:ok};ESTIMATE={distanceKm:2.5,amount:70.0,currency:UAH};SERVER_STOPPED=True"
+    },
+    {
+      "command": "dotnet restore server/Drive2U.slnx --locked-mode",
+      "result": "exit0;all3 projects;Tests493ms"
+    },
+    {
+      "command": "git diff --check; git check-ignore server/Drive2U.Api/bin/Release/net10.0/Drive2U.Api.dll server/Drive2U.Api/obj/project.assets.json server/TestResults/smoke.stdout.log",
+      "result": "exit0;generated outputs ignored"
+    }
+  ],
+  "risks": [
+    "Installed ASP.NET runtime10.0.9 behind official latest10.0.13; no system upgrade performed",
+    "Full vault sources unreadable INVALID_YAML; coordinator must document safe sync blocker after Reviewer",
+    "Demo API lacks auth/trusted routing/production hardening, cannot create quote/order",
+    "First-run HTTPS certificate was automatically created by SDK; not trusted/deleted by agent"
+  ],
+  "open_questions": [],
+  "next_action": "Coordinator passes owned implementation and this handoff to independent Reviewer using drive2u-review; Coder will only resume for concrete findings."
+}
