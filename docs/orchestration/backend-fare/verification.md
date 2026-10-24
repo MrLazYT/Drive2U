@@ -1,5 +1,17 @@
 # Перевірка backend fare orchestration
 
+Актуалізація 2026-10-24: відкладений AC16 завершено через drive2u-sync-knowledge
+після ручного виправлення YAML власником vault. MCP 1.3.1 прочитав усі 12
+раніше проблемних нотаток; Backend-API updated, published=true, commit
+`311d1a76802a0a75090381caff8073eeb4bffab2`, revision
+`bf39934c5ed3ae3a8d890517f3f04802a08ff1422c14335ae3efcd8c1459d586`.
+Readback точно збігається з тілом/metadata; точний повтор аргументів повернув
+unchanged, той самий commit/revision, published=true. Статус компонента planned,
+межі demo estimate і майбутні інтеграції збережені. 37 тестів — історичний
+результат, новий запуск не виконувався. Повні докази:
+[knowledge-yaml-fix.md](../../knowledge-yaml-fix.md).
+Нижче збережено історичний перебіг та попередній YAML-блокер.
+
 Поточний стан: реалізація прийнята незалежним Reviewer без зауважень; перевірки API успішні. Оновлення Backend-API у vault незавершене через INVALID_YAML; ingestion не виконувався.
 
 ## Контекст і послідовність

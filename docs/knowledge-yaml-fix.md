@@ -1,5 +1,94 @@
 # Виправлення YAML frontmatter — 2026-10-24
 
+Перевірка документаційного продовження: `git diff --check` — exit 0;
+індекс до staging порожній, гілка feat/fix-knowledge-yaml. До коміту
+дозволені лише цей файл і docs/orchestration/backend-fare/verification.md.
+Сторонні deletion/pyc/probes/tmp залишені недоторканими.
+
+## Завершення після ручного виправлення — 2026-10-24
+
+Користувач повідомив про ручне виправлення YAML в Obsidian та commit/push у
+drive2u-knowledge. Усі наведені результати нижче отримані через MCP, без
+файлового/git-доступу агента до vault. Початковий MCP head:
+`9d7b96af8b56526071d82a507e518e76b46beb08`.
+
+health_check на початку й після запису: version=1.3.1, write_enabled=true,
+writer_busy=false, pending_push=false, note_count=19; dirty=null,
+git_status=not_checked_by_health. Це не перевірка clean tree чи свіжості origin.
+get_note Conventions.md успішний, revision
+`a1c673177135b4f29f7bf92f397e28da7a639633ed8d761d4fce418ea435da6d`;
+Knowledge-Connector успішний, revision
+`eb6effe3c7482968bbb1f109d863e981d927bc374a36b98839bfcbfdea58c7ff`.
+Усі 12 попередньо проблемних get_note успішні:
+
+| Note ID | Результат | Revision перед синхронізацією |
+| --- | --- | --- |
+| Components/Backend-API.md | успіх | 94db2d7317fb0bca7727ff51851c070f8f28dce40db3e0c8a7becb17627c4086 |
+| Components/Mapping-Integration.md | успіх | f110afb8302657ace6de1fc7db3f28ff55c8d91d01f57293081619c6c4d109e4 |
+| Components/Mobile-Application.md | успіх | 06a203a1d5822ba4df9ccdce5113ba03e54f00354fe7a66228ee1b12439b5128 |
+| Components/Realtime-Updates.md | успіх | e0cb9c811d205f587657a347d3712350f0449dde40539f6890e6d84eb3ea57d0 |
+| Concepts/Driver.md | успіх | 1692a4011d63019206b703e279e050345567035e0e772ff3c3adb3267e64ecd6 |
+| Concepts/Fare-Quote.md | успіх | 22050ecb45f1a83467fc2aba8d628e8f346b9a577044fda08c634de45b0523d9 |
+| Concepts/Passenger.md | успіх | c9875ba837e41b33c50084ecdcad16155ac81bcb0be6e84c0071dc7d5e403bcf |
+| Concepts/Ride-Lifecycle.md | успіх | d8bd7e877838fe69447de968b7650c358cd631d671122b5d17f8ece9078e8553 |
+| Concepts/Route.md | успіх | a2cdcb6bdcbf7734de453e95079dd0f8fcca21232d97e99b1343de2f8cb67978 |
+| Decisions/ADR-001-Technology-Stack.md | успіх | 712a3ee5dbe6812271dadcf2f9cb2067244cf4a1aa0fd0ef194b9e13fa168b50 |
+| Decisions/ADR-002-Server-Authority.md | успіх | e387b603c579096ae4fabafd62104ab605602debd40cdadeb552bb107fd5e55d |
+| Glossary/Project-Glossary.md | успіх | afc7e88ffc9ce10b05eb2b44d4b70fcc3cb00ece4da4af3476b9fca2b4211d40 |
+
+Застосовано drive2u-sync-knowledge: прочитані skill, guardrails, ontology,
+джерела реалізації та історичний verification; AGENTS.md пошуком не знайдено.
+Після setup refresh had errors необхідні локальні shell-команди запускалися
+поза sandbox через разові запити дозволу. Hooks/MCP configuration не змінені.
+
+search_notes(query=Backend-API, limit=1) підтвердив ціль, потім безпосередньо
+перед підготовкою повного тіла виконаний свіжий get_note з revision
+`94db2d7317fb0bca7727ff51851c070f8f28dce40db3e0c8a7becb17627c4086`.
+Саме ця revision передана як expected_revision. Збережено весь попередній
+текст, wikilinks та provenance; Typed relations у початковому тілі відсутні,
+нові ребра не додавалися. Існування всіх цілей підтверджене get_note,
+включно з окремим читанням Concepts/Ride.md. D2U-A001/A002/B003/W003
+дотримано; auth/dependencies/ADR не змінювалися.
+
+Оновлена лише Components/Backend-API.md (title=Backend-API,
+note_type=component, status=planned). Додано підтверджений частковий етап:
+GET /health, POST /api/fare-estimates, decimal/checked arithmetic,
+одне кінцеве AwayFromZero округлення, серверний тариф, UAH, validation.
+Збережено межу demo estimate за недовіреною відстанню: це не Fare-Quote,
+не завершення FR-03 або всього Backend-API; майбутні інтеграції залишилися
+запланованими. Джерело коду:
+`7147aba786978b2aec6411294d5837313d2b7dde`, server/ та
+docs/orchestration/backend-fare/verification.md. git diff цієї ревізії
+до HEAD для server/ порожній. 37 passed наведені як історичний результат
+Coder/Reviewer, цього разу тести не перезапускалися (код не змінено).
+source зберігає попереднє джерело вимог і додає точний SHA та шляхи коду/доказів.
+
+Фактичний ingest_note:
+- status=updated;
+- revision=bf39934c5ed3ae3a8d890517f3f04802a08ff1422c14335ae3efcd8c1459d586;
+- commit=311d1a76802a0a75090381caff8073eeb4bffab2;
+- published=true.
+
+Повторний get_note: та сама revision; повне тіло без frontmatter точно
+збігається з переданим content; type=component, status=planned,
+created=2026-10-22, updated=2026-10-24, tags=[drive2u, component],
+source збігається з аргументом. Точний повтор ingest_note використав усі
+ті самі аргументи, включно з початковими expected_revision та source:
+status=unchanged, та сама revision, той самий commit, published=true.
+Нового коміту точний повтор не створив. Помилок ingestion або нерозв’язаних
+посилань немає; додаткове втручання власника vault не потрібне.
+Knowledge-Connector цією синхронізацією не змінювався.
+
+Відкладений sync Backend-API та AC16 завершені. Попередні звіти про
+INVALID_YAML збережені як історія, а не поточний стан. YAML-валідацію
+не послаблено. Сторонні зміни залишені поза комітом; merge main не виконується.
+
+
+Актуальний результат продовження: MCP 1.3.1 підтверджено; всі 12 раніше проблемних
+нотаток прочитані успішно після ручного виправлення власником. Відкладене оновлення
+Backend-API опубліковано, readback збігається, точний повтор повернув unchanged.
+Наведені нижче попередні блокери збережені як історичні результати.
+
 Проміжний результат: код конектора 1.3.1 перевірений; активний MCP у цій сесії
 ще 1.3.0. Реальне читання після перезапуску й відкладена синхронізація
 Backend-API не завершені. Попередні журнали блокера збережені.
