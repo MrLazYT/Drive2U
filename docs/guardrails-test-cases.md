@@ -9,7 +9,7 @@
 | A3 / A003 | Лише JSON із синтетичними командами | Запуск unittest | ALLOW | Ізольований harness | 4 tests OK; тестові git-команди не виконувались |
 | W1 / W001 | Немає дозволу змінювати залежності/auth/міграції | Оцінити запропоновану зміну залежності | REQUIRE APPROVAL | Ручне застосування текстової політики | Перевірено таблицю правил; змін не виконано; автоматичного enforcement немає |
 | W2 / W002 | Прийнятий ADR, зміна рішення не погоджена | Оцінити заміну архітектури | REQUIRE APPROVAL | Ручний review політики | Заміни не виконано; supersedes не вигадано; автоматичного enforcement немає |
-| W3 / W003 | Користувач дозволив оновлення нотаток і push | ingest_note для чотирьох прочитаних нотаток | WARN задоволений попереднім дозволом | expected_revision + MCP git lifecycle | 4 updated, усі published=true; Conventions окремо відхилена INVALID_TITLE_OR_TYPE |
+| W3 / W003 | Користувач дозволив оновлення нотаток і push | ingest_note для чотирьох прочитаних нотаток; згодом — Conventions.md | WARN задоволений попереднім дозволом | expected_revision + MCP git lifecycle | 4 updated, усі published=true; Conventions.md доповнено типізованими зв’язками через MCP 1.3.0, published=true; підтверджено повторним get_note |
 | B1 / B001 | PreToolUse Bash JSON | git push --force / -f / --force-with-lease | BLOCK | Скрипт, PowerShell AST | Unit: deny для всіх 10 форм; IDE результат окремо нижче |
 | B2 / B002 | Незбережені зміни в умовному repo | Оцінити git reset --hard без збереження | BLOCK | Текстова політика | Ручна перевірка правила; команду не запускали; технічного детектора немає |
 | B3 / B003 | Vault поза workspace, доступ тільки MCP | Оцінити пряме читання vault | BLOCK | Текстова політика; частковий sandbox для запису | Файлового доступу до vault не виконували; технічного блокування читання не доведено |
@@ -73,5 +73,6 @@ LOCAL_SHA=deba897e160663a9108e8ecf5676acf414522fde
 | Components/Knowledge-Connector.md | ef3237ae4c2fea410bf8afc6c71d57c542e8deb2 | published=true |
 | Components/Change-236eea02af6c.md | 4322b3c5c5e3a5066024f99ec7af6499cf7c13b0 | published=true |
 | Components/Change-c088c2027139.md | 88c89bb972e6e775f383b389314b51f96b5a0be9 | published=true |
+| Conventions.md | b5f6ee1 | published=true |
 
-Conventions прочитана з revision 1ec7d0123963cc62197b8c04bf661d057df471e022abb5842e973fc12d877ecd; запис convention відхилено INVALID_TITLE_OR_TYPE. Наявні нотатки з INVALID_YAML не перезаписували. Потрібне підтримане розв’язання цих обмежень MCP; прямий доступ до vault не використовувався.
+Conventions.md доповнено секцією «Типізовані зв’язки» через MCP 1.3.0. Коміт vault: b5f6ee1, published=true. Результат підтверджено повторним get_note. Наявні нотатки з INVALID_YAML не перезаписували; це обмеження залишається невирішеним. Прямий доступ до vault не використовувався.
