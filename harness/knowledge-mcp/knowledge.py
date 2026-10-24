@@ -176,7 +176,7 @@ class Vault:
             busy = True
         else:
             self.lock.release()
-        return {'ok': True, 'version': '1.2.0', 'write_enabled': self.write_enabled,
+        return {'ok': True, 'version': '1.3.0', 'write_enabled': self.write_enabled,
                 'writer_busy': busy, 'pending_push': self.pending.exists(),
                 'note_count': len(list(self.note_ids())),
                 'dirty': None, 'git_status': 'not_checked_by_health',
@@ -257,7 +257,8 @@ class Vault:
                expected_revision: str | None = None):
         if not self.write_enabled:
             raise KnowledgeError('WRITES_DISABLED:set_KNOWLEDGE_ALLOW_WRITE_1')
-        if note_type not in FOLDERS or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,119}', title):
+        is_conventions = title == 'Conventions' and note_type == 'convention'
+        if (note_type not in FOLDERS and not is_conventions) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,119}', title):
             raise KnowledgeError('INVALID_TITLE_OR_TYPE')
         if title.upper() in {'CON','PRN','AUX','NUL',*[f'COM{i}' for i in range(1,10)],*[f'LPT{i}' for i in range(1,10)]}:
             raise KnowledgeError('RESERVED_FILENAME')
@@ -270,7 +271,7 @@ class Vault:
         if expected_revision is not None and not re.fullmatch('[0-9a-f]{64}', expected_revision):
             raise KnowledgeError('INVALID_REVISION')
         links = sorted(set(links or []))
-        note_id = FOLDERS[note_type] + '/' + title + '.md'
+        note_id = 'Conventions.md' if is_conventions else FOLDERS[note_type] + '/' + title + '.md'
         with self.lock:
             branch = self.sync()
             p = self.path(note_id)
@@ -288,6 +289,8 @@ class Vault:
                 if target.casefold() not in stems and target != title:
                     raise KnowledgeError('LINK_TARGET_NOT_FOUND:' + target)
             old = self.read(note_id) if p.exists() else None
+            if is_conventions and old is None:
+                raise KnowledgeError('NOTE_NOT_FOUND')
             old_meta, _ = parse_note(old) if old is not None else ({}, '')
             if old and old_meta['type'] != note_type:
                 raise KnowledgeError('NOTE_TYPE_MISMATCH')

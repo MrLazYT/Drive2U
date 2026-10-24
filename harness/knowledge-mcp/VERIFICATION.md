@@ -1,3 +1,33 @@
+# Перевірка 1.3.0 — 2026-10-24
+
+Windows/Python 3.13, одноразові локальні app/vault/bare remote.
+Команда PowerShell (новий унікальний temp замість недоступного стандартного
+каталогу pytest, де перший запуск отримав WinError 5 до виконання тестів):
+
+```powershell
+$env:PYTHONDONTWRITEBYTECODE='1'
+$testTemp = Join-Path $env:TEMP ('knowledge-conventions-' + [guid]::NewGuid().ToString('N'))
+& ./harness/knowledge-mcp/.venv/Scripts/python.exe -B -m pytest harness/knowledge-mcp/tests -q -p no:cacheprovider --basetemp $testTemp --tb=short
+```
+
+Фактично: **31 passed, 3 skipped in 87.73s**. Пропущені Windows symlink
+без дозволу ОС і два POSIX-тести керування процесами.
+
+Перевірено оновлення наявного кореневого Conventions.md з актуальною ревізією,
+збереження метаданих і попереднього тексту, commit/push до локального remote,
+відхилення застарілої ревізії без зміни файла/HEAD, повтор зі старою ревізією
+без нового коміту. Інші кореневі назви, довільний тип, зміна регістру назви
+і шляхи замість title відхилені. Перевірено writer lock та режим лише читання.
+Ці операції Conventions також перевірено через справжній MCP/STDIO.
+Наявні регресійні тести шляхів, fast-forward, ідемпотентності та відновлення
+після помилки commit/push пройшли.
+
+Стан реального vault: **очікує перезапуску MCP**. До нього Conventions.md
+не оновлювали. Після перезапуску перевірити health_check version=1.3.0,
+прочитати Conventions.md через get_note, зберегти його зміст і доповнити
+правилами типізованих зв'язків із docs/ontology.md через ingest_note
+з актуальною expected_revision. Перевірити published=true та повтор unchanged.
+
 # Перевірка 1.2.0 — 2026-10-23
 
 24 passed, Linux/Python 3.12. Додані два регресійні тести:

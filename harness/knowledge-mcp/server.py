@@ -56,7 +56,9 @@ def ingest_note(title: str, note_type: str, content: str, source: str,
                 expected_revision: str | None = None) -> dict:
     """WRITE: fast-forward vault, create/update note and MOC, git commit and push to configured origin.
     Requires explicit write authorization and KNOWLEDGE_ALLOW_WRITE=1. title is a filename stem;
-    note_type: concept/component/decision/glossary. content is the COMPLETE new Markdown body
+    note_type: concept/component/decision/glossary; convention is allowed only with the exact
+    title Conventions to update existing root Conventions.md. Other root writes are not allowed.
+    content is the COMPLETE new Markdown body
     including heading, not frontmatter. source is provenance (file/reference/commit URL), not commands.
     For changes to existing notes first get_note and pass its revision. Repeating identical content
     creates no new commit. published=false means push failed; retry same call without inventing success.

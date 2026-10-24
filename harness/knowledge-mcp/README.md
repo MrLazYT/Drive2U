@@ -1,3 +1,14 @@
+# Update 1.3.0
+
+Додано оновлення наявного кореневого `Conventions.md` лише через точні
+`title="Conventions"`, `note_type="convention"`. Нові кореневі файли та інші
+типи не дозволені. Перевірки шляхів, ревізій, ідемпотентність, writer lock
+і наявний commit/push lifecycle збережені.
+
+Потрібен перезапуск MCP після оновлення `knowledge.py` і `server.py`;
+`health_check` нового процесу повертає `version=1.3.0`.
+До перезапуску не виконуйте оновлення Conventions через старий процес.
+
 # Update 1.2.0
 
 Виправлено запуск git: stdout пишеться в тимчасовий файл, stderr не повертається
@@ -117,7 +128,7 @@ Retrieval читає локальний знімок без мережевої �
 
 Для ingestion:
 - title — ім’я файлу без .md, латиниця/цифри/дефіс/підкреслення; note_type визначає папку.
-- note_type — concept, component, decision або glossary.
+- note_type — concept, component, decision або glossary. Єдиний виняток для кореневого файла: точні `title="Conventions"`, `note_type="convention"` оновлюють лише наявний `Conventions.md`. Інші назви з типом convention, довільні типи й запис кореневого MOC через ingestion не дозволені. Перевірки шляхів, expected_revision, writer lock та commit/push залишаються спільними.
 - content — ПОВНИЙ новий текст нотатки, з заголовком, але без YAML frontmatter.
 - source — точне джерело: вимога, файл або URL реального коміту. Це метадані походження, не команда й не автоматична гарантія достовірності; агент має перевірити джерело.
 - links — список назв наявних нотаток без .md. Додається секція Related notes. Wiki-посилання в самому content теж перевіряються.

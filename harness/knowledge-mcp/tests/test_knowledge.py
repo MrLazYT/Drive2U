@@ -51,6 +51,86 @@ def test_reject_paths(setup,path):
     with pytest.raises(KnowledgeError):setup[0].get(path)
 
 
+@pytest.fixture
+def conventions(setup):
+    v,remote=setup
+    text=('---\ntype: convention\ncreated: 2026-10-22\nupdated: 2026-10-22\n'
+          'status: active\ntags: [drive2u, convention]\nsource: original\n'
+          'custom: keep\n---\n\n# Conventions\n\nExisting rules.\n')
+    (v.root/'Conventions.md').write_text(text,encoding='utf-8')
+    git(v.root,'add','Conventions.md');git(v.root,'commit','-m','seed conventions');git(v.root,'push')
+    return v,remote,v.get('Conventions.md')
+
+
+def update_conventions(v, **kwargs):
+    return v.ingest('Conventions','convention',
+                    '# Conventions\n\nExisting rules.\n\nTyped relation rules.',
+                    'drive2u/docs/ontology.md',status='active',**kwargs)
+
+
+def test_conventions_update_current_revision(conventions):
+    v,remote,old=conventions
+    result=update_conventions(v,expected_revision=old['revision'])
+    assert result['status']=='updated' and result['published']
+    assert result['note_id']=='Conventions.md'
+    assert git(remote,'rev-parse','main')==result['commit']
+    note=v.get('Conventions.md')
+    assert note['revision']==result['revision']!=old['revision']
+    assert note['metadata']['type']=='convention'
+    assert note['metadata']['created']==old['metadata']['created']
+    assert note['metadata']['custom']=='keep'
+    assert 'Existing rules.' in note['content'] and 'Typed relation rules.' in note['content']
+    assert not (v.root/'Components'/'Conventions.md').exists()
+    assert set(git(v.root,'diff-tree','--no-commit-id','--name-only','-r',result['commit']).splitlines()) <= {'Conventions.md','MOC-Drive2U.md'}
+
+
+def test_conventions_reject_stale_revision(conventions):
+    v,remote,old=conventions
+    first=update_conventions(v,expected_revision=old['revision'])
+    with pytest.raises(KnowledgeError,match='REVISION_CONFLICT'):
+        v.ingest('Conventions','convention','# Different rules','source',
+                 expected_revision=old['revision'])
+    assert v.get('Conventions.md')['revision']==first['revision']
+    assert git(v.root,'rev-parse','HEAD')==git(remote,'rev-parse','main')==first['commit']
+    assert not git(v.root,'status','--porcelain')
+
+
+def test_conventions_repeat_without_new_commit(conventions):
+    v,remote,old=conventions
+    first=update_conventions(v,expected_revision=old['revision'])
+    repeat=update_conventions(v,expected_revision=old['revision'])
+    assert repeat['status']=='unchanged' and repeat['published']
+    assert repeat['revision']==first['revision']
+    assert repeat['commit']==first['commit']==git(remote,'rev-parse','main')
+    assert not git(v.root,'status','--porcelain')
+
+
+@pytest.mark.parametrize('title,note_type',[
+    ('Other','convention'),('conventions','convention'),('MOC-Drive2U','moc'),
+    ('Conventions','arbitrary'),('../Conventions','convention'),
+    ('Other/Conventions','convention'),
+])
+def test_conventions_reject_other_root_or_type(conventions,title,note_type):
+    v,remote,old=conventions
+    before=git(remote,'rev-parse','main')
+    with pytest.raises(KnowledgeError,match='INVALID_TITLE_OR_TYPE'):
+        v.ingest(title,note_type,'# Unauthorized','source',expected_revision=old['revision'])
+    assert git(v.root,'rev-parse','HEAD')==git(remote,'rev-parse','main')==before
+    assert not git(v.root,'status','--porcelain')
+
+
+def test_conventions_writer_lock_and_read_only(conventions):
+    from filelock import FileLock, Timeout
+    v,_,old=conventions
+    with FileLock(str(v.gitdir/'drive2u-knowledge.lock')):
+        with pytest.raises(Timeout):
+            update_conventions(v,expected_revision=old['revision'])
+    v.write_enabled=False
+    with pytest.raises(KnowledgeError,match='WRITES_DISABLED'):
+        update_conventions(v,expected_revision=old['revision'])
+    assert v.get('Conventions.md')['revision']==old['revision']
+
+
 def test_symlink(setup,tmp_path):
     v,_=setup
     (v.root/'Concepts').mkdir();(tmp_path/'outside.md').write_text('secret')
