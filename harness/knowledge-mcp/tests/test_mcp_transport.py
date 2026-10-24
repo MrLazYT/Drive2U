@@ -32,8 +32,10 @@ def test_stdio_tools(tmp_path):
                 assert {t.name for t in tools.tools}=={'health_check','get_note','search_notes','ingest_note'}
                 h=await session.call_tool('health_check',{})
                 assert not h.isError
+                health=h.structuredContent or json.loads(h.content[0].text)
+                assert health['version']=='1.3.1'
                 for title in ['Transport-Read','Transport-Search','Transport-Write']:
-                    args={'title':title,'note_type':'concept','content':f'# {title}\nSynthetic protocol fixture.', 'source':'synthetic integration test'}
+                    args={'title':title,'note_type':'concept','content':f'# {title}\nSynthetic protocol fixture.\n\n---\nBody---text.', 'source':'synthetic---integration test'}
                     first=await session.call_tool('ingest_note',args)
                     assert not first.isError
                     data=first.structuredContent or json.loads(first.content[0].text)
@@ -43,6 +45,9 @@ def test_stdio_tools(tmp_path):
                     assert not repeated.isError and data['status']=='unchanged'
                 note=await session.call_tool('get_note',{'note_id':'Concepts/Transport-Read.md'})
                 assert not note.isError
+                data=note.structuredContent or json.loads(note.content[0].text)
+                assert data['metadata']['source']=='synthetic---integration test'
+                assert '\n---\nBody---text.' in data['content']
                 search=await session.call_tool('search_notes',{'query':'Transport'})
                 assert not search.isError
                 denied=await session.call_tool('get_note',{'note_id':'../secret.md'})

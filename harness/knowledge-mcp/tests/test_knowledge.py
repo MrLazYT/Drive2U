@@ -3,7 +3,7 @@ import subprocess
 import sys
 import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from knowledge import Vault, KnowledgeError
+from knowledge import Vault, KnowledgeError, parse_note
 
 
 def git(root, *args):
@@ -25,6 +25,45 @@ def setup(tmp_path):
 
 def create(v, title='Ride', **kwargs):
     return v.ingest(title,'concept','# Ride\n\nA ride.','drive2u/docs/app-requirements.md',**kwargs)
+
+
+def test_frontmatter_delimiter_inside_quoted_source(setup):
+    v, _ = setup
+    text = ('---\ntype: component\ncreated: 2026-10-24\nupdated: 2026-10-24\n'
+            'status: planned\ntags: [drive2u, component]\n'
+            'source: "docs/example---reference.md"\n---\n\n# Example\n\n---\nBody.\n')
+    target = v.root / 'Components' / 'Example.md'
+    target.parent.mkdir()
+    target.write_text(text, encoding='utf-8')
+    note = v.get('Components/Example.md')
+    assert note['metadata']['source'] == 'docs/example---reference.md'
+    assert note['content'] == text
+
+
+@pytest.mark.parametrize('newline', ['\n', '\r\n'])
+@pytest.mark.parametrize('bom', ['', '\ufeff'])
+def test_parse_note_line_fences_and_encoding(newline, bom):
+    text = ('---\ntype: component\ncreated: 2026-10-24\nupdated: 2026-10-24\n'
+            'status: planned\ntags: [drive2u, component]\n'
+            'source: "docs/example---reference.md"\n'
+            'custom: |\n  embedded---value\n---\n\n# Example\n\n---\nBody---text.\n')
+    metadata, body = parse_note(bom + text.replace('\n', newline))
+    assert metadata['source'] == 'docs/example---reference.md'
+    assert metadata['custom'] == 'embedded---value\n'
+    assert body == '# Example\n\n---\nBody---text.'
+
+
+@pytest.mark.parametrize('text,error', [
+    ('', 'INVALID_FRONTMATTER'),
+    ('type: component\n---\n# Body', 'INVALID_FRONTMATTER'),
+    ('---\nsource: "has---text"\n# Missing closing fence', 'INVALID_FRONTMATTER'),
+    ('---\nsource: [unterminated\n---\n# Body', 'INVALID_YAML'),
+    ('---\ntags:\n\u00a0 - synthetic\nsource: test\n---\n# Body', 'INVALID_YAML'),
+    ('---\nsource: valid\n---\n# Body', 'MISSING_METADATA'),
+])
+def test_parse_note_preserves_explicit_errors(text, error):
+    with pytest.raises(KnowledgeError, match='^' + error + '$'):
+        parse_note(text)
 
 
 def test_create_get_search_repeat_update(setup):

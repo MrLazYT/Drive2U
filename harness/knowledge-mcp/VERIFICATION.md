@@ -1,3 +1,31 @@
+# Перевірка 1.3.1 — 2026-10-24
+
+Перед виправленням: regression quoted source з `---` — **1 failed**,
+KnowledgeError INVALID_YAML із початкового parse_note. Після виправлення:
+**42 passed, 3 skipped in 81.68s**, Windows/Python 3.13, одноразові локальні
+app/vault/bare remote. Окрема parser-група — 11 passed. Команда:
+
+```powershell
+& harness/knowledge-mcp/.venv/Scripts/python.exe -B -m pytest harness/knowledge-mcp/tests -q -ra -p no:cacheprovider --basetemp .tmp-yaml-full --tb=short
+```
+
+Підтверджено окремі рядки fences, source/body з `---`, LF/CRLF/BOM,
+block scalar, явні missing/malformed errors, незмінні paths/revisions/locks/git
+регресії та новий transport-процес health=1.3.1. Три пропуски: symlink без
+Windows-дозволу й два POSIX process-group cases. drive2u-review застосовано,
+нових знахідок немає; це не незалежний окремий агент.
+
+**Активний MCP усе ще 1.3.0**, а не 1.3.1. До перезапуску Conventions і
+Knowledge-Connector читаються, Backend-API/Fare-Quote/Route — INVALID_YAML.
+MCP-search показав NBSP U+00A0 у tags-відступах цих трьох нотаток;
+синтетичний аналог навмисно лишається INVALID_YAML у новому парсері.
+Не заявляється усунення всіх реальних YAML-помилок. Післяперезапускові
+читання та sync Backend-API ще не виконані; ingest не було.
+Повні докази, revisions, межі review та інструкція продовження:
+[knowledge-yaml-fix.md](../../docs/knowledge-yaml-fix.md).
+
+Нижче збережені попередні результати без переписування історії.
+
 # Перевірка 1.3.0 — 2026-10-24
 
 Windows/Python 3.13, одноразові локальні app/vault/bare remote.

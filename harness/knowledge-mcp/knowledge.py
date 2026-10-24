@@ -27,16 +27,20 @@ def revision(text: str) -> str:
 
 
 def parse_note(text: str):
-    parts = text.split('---', 2)
-    if not text.startswith('---\n') or len(parts) != 3:
+    # Frontmatter fences are complete lines, never substrings of YAML values.
+    lines = text.removeprefix('\ufeff').replace('\r\n', '\n').split('\n')
+    if lines[0] != '---':
+        raise KnowledgeError('INVALID_FRONTMATTER')
+    closing = next((i for i in range(1, len(lines)) if lines[i] == '---'), None)
+    if closing is None:
         raise KnowledgeError('INVALID_FRONTMATTER')
     try:
-        metadata = yaml.safe_load(parts[1])
+        metadata = yaml.safe_load('\n'.join(lines[1:closing]) + '\n')
     except yaml.YAMLError:
         raise KnowledgeError('INVALID_YAML') from None
     if not isinstance(metadata, dict) or not REQUIRED.issubset(metadata):
         raise KnowledgeError('MISSING_METADATA')
-    return metadata, parts[2].strip()
+    return metadata, '\n'.join(lines[closing + 1:]).strip()
 
 
 class Vault:
@@ -176,7 +180,7 @@ class Vault:
             busy = True
         else:
             self.lock.release()
-        return {'ok': True, 'version': '1.3.0', 'write_enabled': self.write_enabled,
+        return {'ok': True, 'version': '1.3.1', 'write_enabled': self.write_enabled,
                 'writer_busy': busy, 'pending_push': self.pending.exists(),
                 'note_count': len(list(self.note_ids())),
                 'dirty': None, 'git_status': 'not_checked_by_health',

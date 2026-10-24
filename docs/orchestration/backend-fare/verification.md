@@ -83,3 +83,12 @@ Reviewer hash staged diff коду/конфігурації/role harness до й
 Не виконувались production deployment, perf/load benchmarks, Identity/права, routing/maps/geocoding, DB, SignalR, mobile, orders або повний Fare-Quote. Live smoke виконаний Coder, Reviewer повторно його не запускав: прочитав script/evidence й незалежно перевірив HTTP pipeline тестами. Встановлений runtime потребує окремого servicing update; агент системних інструментів не встановлював. Vault sync незавершений як описано вище. Сторонні файли, caches, bin/obj/TestResults, hook-probe і .codex/hook-probe-path.txt виключені з індексу; hooks/MCP/knowledge-mcp не змінені цією реалізацією, merge main не виконується.
 
 Фінальна перевірка координатора перед комітом: 31 погоджений файл в індексі; allowlist-перевірка шляхів без сторонніх/generated artifacts; `git diff --cached --check` exit 0; усі три handoff повторно schema-валідні; hash коду/конфігурації/harness збігається з незалежним Reviewer `54599b11d22e83d32f2283cb193621519d1cb945`. Staged змін hooks/MCP/knowledge-mcp немає. Сторонні deletion README (1).md і modified pyc лишилися unstaged. Після останніх перевірок змінено лише цей запис доказів, додаткового запуску тестів не потрібно.
+
+## Доповнення 2026-10-24: діагностика відкладеного YAML-блокера
+
+У feat/fix-knowledge-yaml виправлено parse_note fence-дефект (код 1.3.1,
+red/green і 42 passed/3 skipped). Це не зміна серверного API й не усунення
+історичного блокера заднім числом. Активний MCP ще 1.3.0; післяперезапускове
+читання Backend-API і синхронізація AC16 очікують продовження. MCP-search
+показав також NBSP у tags-відступах; автоматичного ремонту notes не було.
+Докази та точний промпт: [knowledge-yaml-fix.md](../../knowledge-yaml-fix.md).
