@@ -1,0 +1,86 @@
+{
+  "role": "planner",
+  "goal": "Працездатний Android MVP Drive2U з повним циклом замовлення, двома ролями та збереженням даних.",
+  "scope": ["mobile/", "server/", "docs/mvp/", "локальні product launch config та lockfiles"],
+  "acceptance_criteria": [
+    "Пасажир входить, вибирає дві точки на мапі/з переліку Львова, отримує server quote та підтверджує один idempotent ride.",
+    "Інший клієнт водія входить, вмикає доступність, приймає Waiting, виконує Accepted → Arrived → InProgress → Completed; історія обох зберігається після перезапуску.",
+    "Identity passwords/roles, expiring revocable bearer sessions, SecureStore, owner/role checks; register не призначає Driver.",
+    "SQLite EF migrations, idempotent Development seed, transactional concurrency: один accept success та один контрольований409.",
+    "FareQuote з server routing, calculator reuse, snapshot тарифу/маршруту/ціни, expiry, чужий quote відхилено.",
+    "FR07: passenger cancel Waiting/Accepted; assigned driver cancel Accepted/Arrived з причиною; кінцеві стани незмінні.",
+    "SignalR лише учасникам, API refresh на reconnect/foreground та fallback; чужі detail/events недоступні.",
+    "Server build/tests/full API smoke, mobile typecheck/Jest/Expo compatibility; Android UI перевірено окремо або чесно позначено недоступним."
+  ],
+  "initial_sha": "6ffb4e2cd6d19dee0fbda0f469ec565df9d58956",
+  "sources": [
+    {"path": "docs/app-requirements.md", "sections": "FR01–FR10, business rules, data, acceptance"},
+    {"path": "server/Drive2U.Api/Program.cs", "observed": "Existing stateless fare estimate, configured FareTariff and existing FareCalculator"},
+    {"path": "server/Drive2U.Api/Drive2U.Api.csproj", "observed": "Existing Web API project references Fares; EF/Identity persistence not yet implemented"},
+    {"path": "harness/orchestration/handoff.schema.json", "observed": "Existing handoff contract used without harness changes"},
+    {"mcp": "Concepts/Ride-Lifecycle.md", "revision": "d8bd7e877838fe69447de968b7650c358cd631d671122b5d17f8ece9078e8553", "observed_by": "coordinator", "fact": "Current MCP lifecycle and cancellation rules match FR07 and user scope"}
+  ],
+  "confirmed_facts": [
+    "Current requirements match requested cancellation rules; no changed requirement or ADR needed for lifecycle.",
+    "Existing Program registers FareCalculator/FareTariff; full quotes must reuse this formula rather than introduce a duplicate.",
+    "Initial main contains merged PR1. Coordinator created feat/working-mvp from origin/main; unrelated tracked bytecode/deletion and untracked probes/tmp must remain untouched.",
+    "Coordinator environment: Node26.3.1/npm11.16.0/.NET10.0.301; Android adb/SDK absent. Device UI cannot be implied by API smoke."
+  ],
+  "decisions": [
+    {"decision": "Use Identity UserManager for account/password/role handling plus opaque random256-bit session token; persist only SHA256 token hash, user, expiry and revocation.", "rationale": "Binds sessions to Identity identities while allowing immediate logout revocation, bounded expiry and restart persistence without production signing secrets. Built-in protected bearer tickets alone do not automatically revalidate security stamp each request."},
+    {"decision": "Separate backend server/ ownership from mobile/ ownership; coordinator owns integration/docs/launch configuration.", "rationale": "Allows product implementation in parallel without shared-file edits after contract acceptance."},
+    {"decision": "camelCase JSON, UTC ISO times, enum strings Passenger/Driver and Waiting/Accepted/Arrived/InProgress/Completed/Cancelled.", "rationale": "One explicit contract for TypeScript client, API and smoke tests."},
+    {"decision": "API contract in api_contract object; SignalR is automatic authenticated user scope without client-selected ride groups.", "rationale": "Prevents arbitrary foreign ride subscriptions; events cause API refresh and do not expose contacts."},
+    {"decision": "SQLite immediate write transactions plus unique active-passenger/active-driver indexes and ride version concurrency.", "rationale": "Serialize competing mutations before reads and enforce invariants at database boundary; map lock/constraint/concurrency conflicts to409."},
+    {"decision": "Explicit Demo and Live routing modes; no silent fallback. Persist snapshot geometry, distance, duration, tariff and price in quote and ride.", "rationale": "Demo can run without external route provider; live failures remain visible and never become straight-line billed distance."}
+  ],
+  "api_contract": {
+    "auth": {
+      "POST /api/auth/register": "{name,email,password} -> Session; only Passenger, reject extra role field",
+      "POST /api/auth/login": "{email,password} -> Session",
+      "POST /api/auth/logout": "bearer current session ->204; revoke persisted session",
+      "GET /api/me": "bearer -> User"
+    },
+    "planning": {
+      "GET /api/config": "{routingMode:'Demo'|'Live',quoteLifetimeSeconds:number}",
+      "GET /api/locations": "Location[]",
+      "POST /api/quotes": "{pickup:Point,destination:Point,routingMode:'Demo'|'Live'} -> Quote"
+    },
+    "rides": {
+      "POST /api/rides": "{quoteId:string,idempotencyKey:string} -> Ride; same passenger/key/quote returns original even after quote expiry; same key with other quote409",
+      "GET /api/rides/active": "Ride|null",
+      "GET /api/rides/history?page=1&pageSize=20": "{items:Ride[],page:number,pageSize:number,total:number}",
+      "GET /api/rides/{id}": "Ride; participants only",
+      "GET /api/driver/orders": "Ride[] with passenger:null and driver:null; no passenger identity before acceptance",
+      "PUT /api/driver/availability": "{available:boolean} -> User",
+      "POST /api/rides/{id}/accept": "{} -> Ride",
+      "POST /api/rides/{id}/status": "{status:'Arrived'|'InProgress'|'Completed'} -> Ride",
+      "POST /api/rides/{id}/cancel": "{reason:string} -> Ride; assigned driver reason1..300 characters required"
+    },
+    "dto": {
+      "Session": "{accessToken:string,expiresAt:string,user:User}",
+      "User": "{id:string,name:string,email:string,role:'Passenger'|'Driver',driverProfile:null|{approved:boolean,available:boolean,vehicle:{make:string,model:string,plate:string}}}",
+      "Location": "{id:string,name:string,latitude:number,longitude:number}",
+      "Point": "{latitude:number,longitude:number,address:string,locationId?:string}",
+      "Route": "{distanceKm:number,durationSeconds:number,geometry:{latitude:number,longitude:number}[],isDemo:boolean,attribution:string}",
+      "Quote": "{id:string,pickup:Point,destination:Point,route:Route,amount:number,currency:'UAH',expiresAt:string}",
+      "Ride": "{id:string,status:string,version:number,pickup:Point,destination:Point,route:Route,amount:number,currency:'UAH',createdAt:string,updatedAt:string,passenger:null|{id:string,name:string},driver:null|{id:string,name:string,vehicle:{make:string,model:string,plate:string}},cancellation:null|{by:string,reason:string,at:string}}",
+      "Error": "ProblemDetails {status:number,title:string,detail?:string,code?:string}; no raw exception or tokens"
+    },
+    "realtime": {
+      "endpoint": "/hubs/rides",
+      "event": "RideChanged {rideId:string,version:number,status:string}",
+      "authorization": "Authenticated per-user group chosen server-side only. Emit after committed mutation to passenger and assigned driver; no arbitrary join method.",
+      "recovery": "Client refetch active/history on event, reconnect and foreground; controlled periodic API refresh while active/offline reconnect. Avoid stale version regression."
+    },
+    "legacy": "Keep /health and /api/fare-estimates for regression compatibility; order flow never trusts distanceKm or amount submitted by client."
+  },
+  "allowed_changes": ["server/ API/data/auth/routes/migrations/seed/tests and lockfiles", "mobile/ Expo TypeScript UI, API, map and tests with pinned dependencies", "product README/config/docs/mvp evidence", "MCP knowledge sync after verified implementation within user authorization"],
+  "forbidden_changes": ["harness or hooks changes", "global configuration", "direct vault filesystem/git access", "unrelated local changes", "force push/reset/clean/overwrite", "main merge", "committed databases/tokens/model/index/node_modules/build artifacts"],
+  "changed_files": ["docs/mvp/planner-handoff.json", "docs/mvp/api-contract.md"],
+  "checks": [{"command": "Read existing schema, Program.cs, csproj and approved application requirements", "result": "Contract reflects existing calculator and FR07. No application code edited by Planner."}, {"command": "python -B jsonschema.validate(planner-handoff, handoff.schema.json)", "result": "planner-handoff schema valid"}, {"command": "git diff --check -- docs/mvp/planner-handoff.json docs/mvp/api-contract.md", "result": "exit0"}],
+  "risks": ["Expo/React Native versions must be checked against official compatibility docs before installing.", "Public OSM tiles/routing services have conditions/quotas and no assumed SLA; demo must be explicitly labelled.", "Android SDK/device unavailable locally; coordinator must report UI verification limits separately from API smoke.", "SQLite tests must use actual independent connections and concurrent requests, not EF InMemory."],
+  "open_questions": [],
+  "next_action": "Coordinator accepted concrete API contract; assign server/ and mobile/ exclusively to separate Coders. Integrate and test, then independent drive2u-review before knowledge sync/commit/push.",
+  "outcome": "Contract accepted by coordinator; docs/mvp/api-contract.md and schema-valid planner handoff written. Product implementation and acceptance remain pending."
+}

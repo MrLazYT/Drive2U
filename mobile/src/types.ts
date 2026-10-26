@@ -1,0 +1,12 @@
+export type Coordinate = { latitude: number; longitude: number };
+export type Point = Coordinate & { address: string; locationId?: string };
+export type Location = Coordinate & { id: string; name: string };
+export type Vehicle = { make: string; model: string; plate: string };
+export type User = { id: string; name: string; email: string; role: 'Passenger'|'Driver'; driverProfile: null | { approved: boolean; available: boolean; vehicle: Vehicle|null } };
+export type Session = { accessToken: string; expiresAt: string; user: User };
+export type Route = { distanceKm: number; durationSeconds: number; geometry: Coordinate[]; isDemo: boolean; attribution: string };
+export type Quote = { id: string; pickup: Point; destination: Point; route: Route; amount: number; currency: 'UAH'; expiresAt: string };
+export type RideStatus = 'Waiting'|'Accepted'|'Arrived'|'InProgress'|'Completed'|'Cancelled';
+export type Ride = { id: string; status: RideStatus; version: number; pickup: Point; destination: Point; route: Route; amount: number; currency: 'UAH'; createdAt: string; updatedAt: string; passenger: null|{id:string;name:string}; driver: null|{id:string;name:string;vehicle:Vehicle|null}; cancellation:null|{by:string;reason:string;at:string} };
+export type History = { items: Ride[]; page: number; pageSize: number; total: number };
+export type RoutingMode = 'Demo'|'Live';

@@ -1,0 +1,25 @@
+{
+    "baseUrl":  "http://127.0.0.1:5193",
+    "apiRestarted":  true,
+    "databasePersistent":  true,
+    "checkedAt":  "2026-10-26T21:13:19.0920584Z",
+    "status":  "passed",
+    "androidUiTested":  false,
+    "routeMode":  "Demo",
+    "checks":  [
+                   "Development accounts authenticate in separate clients",
+                   "Known Lviv locations available",
+                   "Server returns explicit demo road-shaped route and priced expiring quote",
+                   "Repeated confirmation creates one Waiting ride",
+                   "Ride survives logout and role/account switch",
+                   "Available driver sees Waiting ride",
+                   "Waiting list does not expose passenger identity",
+                   "Assigned driver and car visible after atomic acceptance",
+                   "Both clients see Arrived with current version",
+                   "Both clients see InProgress with current version",
+                   "Both clients see Completed with current version",
+                   "Completed amount equals confirmed server quote",
+                   "Passenger history persists after API restart",
+                   "Driver history persists after API restart"
+               ]
+}

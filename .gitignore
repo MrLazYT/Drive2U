@@ -7,3 +7,25 @@
 __pycache__/
 .pytest_cache/
 /.tmp-retrieval-*/
+
+# Drive2U application runtime and local builds
+/mobile/node_modules/
+/mobile/.expo/
+/mobile/dist/
+/mobile/coverage/
+/mobile/android/
+/mobile/ios/
+/mobile/.env
+/mobile/.env.local
+/server/**/App_Data/
+/server/**/*.db
+/server/**/*.db-shm
+/server/**/*.db-wal
+/server/**/*.db-journal
+/drive2u.db
+/drive2u.db-shm
+/drive2u.db-wal
+/drive2u.db-journal
+/.tmp-mvp-*/
+*.apk
+*.aab
