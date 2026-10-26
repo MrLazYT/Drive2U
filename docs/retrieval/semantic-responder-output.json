@@ -1,0 +1,132 @@
+[
+  {
+    "id": "Q1",
+    "actual_agent_answer": "За запланованим Fare-Quote ціну визначає Backend-API: BaseFare + DistanceKm × RatePerKm; відстань сервер отримує через Mapping-Integration, а тариф зберігається знімком. Клієнтські ціна й відстань не є підставою розрахунку, тому підмінити ними тариф за цим контрактом не можна. Decimal, округлення до 2 знаків AwayFromZero, UAH. Це planned, а не доказ реалізації.",
+    "cited_notes": [
+      {
+        "note_id": "Concepts/Fare-Quote.md",
+        "revision": "22050ecb45f1a83467fc2aba8d628e8f346b9a577044fda08c634de45b0523d9"
+      }
+    ],
+    "abstention": false
+  },
+  {
+    "id": "Q2",
+    "actual_agent_answer": "Запланований порядок: Waiting → Accepted — доступний допущений водій; Accepted → Arrived → InProgress → Completed — призначений водій. Waiting → Cancelled — пасажир-власник; Accepted → Cancelled — власник або призначений водій; Arrived → Cancelled — призначений водій. Інші переходи заборонені, Completed і Cancelled кінцеві. Відмова водія потребує причини; ініціатор і час скасування зберігаються. Backend-API перевіряє стан і версію транзакційно. Нотатки planned.",
+    "cited_notes": [
+      {
+        "note_id": "Concepts/Ride-Lifecycle.md",
+        "revision": "d8bd7e877838fe69447de968b7650c358cd631d671122b5d17f8ece9078e8553"
+      },
+      {
+        "note_id": "Concepts/Ride.md",
+        "revision": "2bdeaab241a2f163012a57194878e5ce14b505d3a067c9e5f7c9df93a55da962"
+      }
+    ],
+    "abstention": false
+  },
+  {
+    "id": "Q3",
+    "actual_agent_answer": "Підтверджена нотаткою зміна репозиторію додає STDIO MCP health_check/get_note/search_notes/ingest_note, окремі корені app/vault та прапорець дозволу запису. Реалізовані відмови при вимкненому записі, некоректних шляхах, конфлікті ревізій, зайнятому writer lock і нечистому vault; невдалий push повертає published=false та залишає маркер повтору. Це не підтвердження розгортання. Для повного переліку guardrails і точних меж доступу утримуюся від відповіді: надано лише нотатку про цей коміт, без політики guardrails.",
+    "cited_notes": [
+      {
+        "note_id": "Components/Change-236eea02af6c.md",
+        "revision": "356da8bbfc0b1db91a18c6c2bd5b3e1e0c3aabd9e28b7bee64aee2f623075d0a"
+      }
+    ],
+    "abstention": true
+  },
+  {
+    "id": "Q4",
+    "actual_agent_answer": "Суму рахує сервер. Уже реалізований POST /api/fare-estimates приймає лише числове distanceKm > 0; BaseFare і RatePerKm задає серверна конфігурація. Клієнтські amount, currency чи тариф є невідомими полями та відхиляються 400 problem JSON. Формула decimal BaseFare + DistanceKm × RatePerKm з фінальним округленням AwayFromZero до 2 знаків, валюта UAH. Однак це демонстраційний estimate за недовіреною клієнтською відстанню, а не погоджена ціна поїздки: серверна маршрутизація, quoteId, строк дії та фіксація ціни ще не реалізовані. Запланований Fare-Quote використовує серверно отриману відстань і знімок тарифу.",
+    "cited_notes": [
+      {
+        "note_id": "Components/Backend-API.md",
+        "revision": "bf39934c5ed3ae3a8d890517f3f04802a08ff1422c14335ae3efcd8c1459d586"
+      },
+      {
+        "note_id": "Concepts/Fare-Quote.md",
+        "revision": "22050ecb45f1a83467fc2aba8d628e8f346b9a577044fda08c634de45b0523d9"
+      }
+    ],
+    "abstention": false
+  },
+  {
+    "id": "Q5",
+    "actual_agent_answer": "Утримуюся від висновку про допустимість прямолінійної заміни при відмові сервісу: надані Conventions і глосарій цього правила не містять. Глосарій визначає Routing як побудову автомобільного маршруту, але не описує fallback або оброблення відмов.",
+    "cited_notes": [
+      {
+        "note_id": "Glossary/Project-Glossary.md",
+        "revision": "afc7e88ffc9ce10b05eb2b44d4b70fcc3cb00ece4da4af3476b9fca2b4211d40"
+      }
+    ],
+    "abstention": true
+  },
+  {
+    "id": "Q6",
+    "actual_agent_answer": "Утримуюся від конкретної інструкції відновлення екрана: у наданих для цього питання фрагментах і readbacks немає контракту повторного підключення чи відновлення пропущених realtime-подій. Planned Ride лише вказує, що зміни передаються через Realtime-Updates; посилання не замінює вміст цієї нотатки.",
+    "cited_notes": [
+      {
+        "note_id": "Concepts/Ride.md",
+        "revision": "2bdeaab241a2f163012a57194878e5ce14b505d3a067c9e5f7c9df93a55da962"
+      }
+    ],
+    "abstention": true
+  },
+  {
+    "id": "Q7",
+    "actual_agent_answer": "За запланованим контрактом Waiting → Accepted дозволений лише доступному допущеному водію. До прийняття водія немає, після нього призначений рівно один; подальші переходи виконує призначений водій. Backend-API контролює активні замовлення й атомарне прийняття, перевіряючи поточний стан і версію всередині транзакції: два паралельні прийняття мають завершитися узгоджено, без подвійного призначення та часткових даних. Перевірки тільки в UI недостатньо. Нотатки planned; конкретні критерії допуску й алгоритм доступності тут не деталізовані.",
+    "cited_notes": [
+      {
+        "note_id": "Concepts/Ride.md",
+        "revision": "2bdeaab241a2f163012a57194878e5ce14b505d3a067c9e5f7c9df93a55da962"
+      },
+      {
+        "note_id": "Concepts/Ride-Lifecycle.md",
+        "revision": "d8bd7e877838fe69447de968b7650c358cd631d671122b5d17f8ece9078e8553"
+      }
+    ],
+    "abstention": false
+  },
+  {
+    "id": "Q8",
+    "actual_agent_answer": "Наданий planned Fare-Quote має ідентифікатор, строк дії, серверно отриману відстань, знімок тарифу та підтвердження пасажиром перед створенням Ride. Backend-API отримує відстань через Mapping-Integration; клієнтські ціна чи відстань не є підставою розрахунку, а помилка маршрутизації не повинна породжувати вигадану ціну. Для порівняння з фактично реалізованим fare-estimates утримуюся від висновку: докази його реалізації в матеріалах саме цього питання відсутні.",
+    "cited_notes": [
+      {
+        "note_id": "Concepts/Fare-Quote.md",
+        "revision": "22050ecb45f1a83467fc2aba8d628e8f346b9a577044fda08c634de45b0523d9"
+      }
+    ],
+    "abstention": true
+  },
+  {
+    "id": "Q9",
+    "actual_agent_answer": "Це запланований контракт: Backend-API транзакційно перевіряє стан і версію, а SignalR повідомляє лише після збереження/завершення транзакції. API залишається джерелом істини. Подія містить ID поїздки, статус і версію; клієнт відкидає застарілі події, щоб UI не повертався назад. Після розриву й повторного підключення перечитує поточний стан через API, компенсуючи пропущені події. Доставка кожної події не гарантується; втрата каналу автоматично не скасовує поїздку. Доступ до каналу перевіряє сервер.",
+    "cited_notes": [
+      {
+        "note_id": "Components/Realtime-Updates.md",
+        "revision": "e0cb9c811d205f587657a347d3712350f0449dde40539f6890e6d84eb3ea57d0"
+      },
+      {
+        "note_id": "Concepts/Ride-Lifecycle.md",
+        "revision": "d8bd7e877838fe69447de968b7650c358cd631d671122b5d17f8ece9078e8553"
+      }
+    ],
+    "abstention": false
+  },
+  {
+    "id": "Q10",
+    "actual_agent_answer": "Надані матеріали не підтверджують такої реалізації. Route і Realtime-Updates мають status planned; постійне передавання позиції водія планується окремо, а безперервна GPS-трансляція не входить до початкового realtime-контракту повідомлень про збережені зміни стану. Щодо автоматичного призначення саме найближчого водія утримуюся від твердження про реалізацію або конкретний алгоритм: відповідних доказів не надано.",
+    "cited_notes": [
+      {
+        "note_id": "Concepts/Route.md",
+        "revision": "a2cdcb6bdcbf7734de453e95079dd0f8fcca21232d97e99b1343de2f8cb67978"
+      },
+      {
+        "note_id": "Components/Realtime-Updates.md",
+        "revision": "e0cb9c811d205f587657a347d3712350f0449dde40539f6890e6d84eb3ea57d0"
+      }
+    ],
+    "abstention": true
+  }
+]

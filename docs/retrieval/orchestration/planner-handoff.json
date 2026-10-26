@@ -1,0 +1,140 @@
+{
+  "role": "planner",
+  "completed_semantic_evidence": [{"tool":"search_notes","arguments":{"query":"implemented fare estimate calculator versus planned Fare-Quote FR-03","limit":6},"mode":"semantic","model":"intfloat/multilingual-e5-small@614241f622f53c4eeff9890bdc4f31cfecc418b3","head":"311d1a76802a0a75090381caff8073eeb4bffab2","corpus_revision":"5e76ba691dcb85fc80b559e665e2a6fc9ae2273e39c84a01b048ed83f094c48e","index_updates":{"changed":0,"removed":0},"excerpts":[{"note_id":"Concepts/Fare-Quote.md","revision":"22050ecb45f1a83467fc2aba8d628e8f346b9a577044fda08c634de45b0523d9","section":"Пропозиція ціни / Розрахунок","excerpt":"## Розрахунок\nFare = BaseFare + DistanceKm × RatePerKm.\n\nГроші обчислюються decimal, фінальна сума округлюється до 2 знаків AwayFromZero. Валюта першої версії — UAH. Відстань отримує [[Backend-API]] через [[Mapping-Integration]]; клієнтська ціна або відстань не є підставою розрахунку.","score":0.837591,"score_kind":"cosine_similarity"},{"note_id":"Concepts/Fare-Quote.md","revision":"22050ecb45f1a83467fc2aba8d628e8f346b9a577044fda08c634de45b0523d9","section":"Пропозиція ціни","excerpt":"# Пропозиція ціни","score":0.833329,"score_kind":"cosine_similarity"},{"note_id":"Concepts/Fare-Quote.md","revision":"22050ecb45f1a83467fc2aba8d628e8f346b9a577044fda08c634de45b0523d9","section":"Пропозиція ціни / Визначення","excerpt":"## Визначення\nFareQuote — пропозиція ціни для конкретних точок [[Route]] з ідентифікатором, строком дії, серверно отриманою відстанню та знімком тарифу. Її підтверджує [[Passenger]] перед створенням [[Ride]].","score":0.8321,"score_kind":"cosine_similarity"},{"note_id":"Components/Backend-API.md","revision":"bf39934c5ed3ae3a8d890517f3f04802a08ff1422c14335ae3efcd8c1459d586","section":"Серверний API / Підтверджений частковий етап — 2026-10-24","excerpt":"## Підтверджений частковий етап — 2026-10-24\nНа ревізії Drive2U `7147aba786978b2aec6411294d5837313d2b7dde` реалізовано початковий ASP.NET Core API у `server/` та незалежний модуль `Drive2U.Fares`. Попередні розділи описують цільову архітектуру; Identity, EF Core/SQLite, авторизація, серверна маршрутизація, повний Fare-Quote, замовлення/їх життєвий цикл, SignalR і mobile ще не реалізовані. Статус усього компонента залишається planned.\n\n`GET /health` повертає 200 із `{\"status\":\"ok\"}`. `POST /api/fare-estimates` приймає лише числове `distanceKm > 0` і повертає distanceKm, amount та currency=UAH. Калькулятор використовує decimal, формулу `BaseFare + DistanceKm * RatePerKm`, checked arithmetic та єдине округлення кінцевої суми до двох знаків `MidpointRounding.AwayFromZero`. Тариф задається серверною конфігурацією; BaseFare і RatePerKm обов’язкові та невід’ємні, некоректна","score":0.828295,"score_kind":"cosine_similarity"},{"note_id":"Concepts/Fare-Quote.md","revision":"22050ecb45f1a83467fc2aba8d628e8f346b9a577044fda08c634de45b0523d9","section":"Пропозиція ціни / Перевірка","excerpt":"## Перевірка\nВідхилення простроченої або чужої пропозиції; точне округлення; незмінність ціни після зміни тарифу; відсутність вигаданої ціни при помилці маршрутизації. Приклад із синтетичними числами: 40 + 5 × 12 = 100 UAH; це не встановлений тариф Drive2U.","score":0.821914,"score_kind":"cosine_similarity"},{"note_id":"Concepts/Ride.md","revision":"2bdeaab241a2f163012a57194878e5ce14b505d3a067c9e5f7c9df93a55da962","section":"Замовлення поїздки / Typed relations","excerpt":"## Typed relations\n- depends_on: [[Fare-Quote]]\n- uses: [[Backend-API]]\n- governed_by: [[ADR-002-Server-Authority]]","score":0.814453,"score_kind":"cosine_similarity"}]},{"tool":"get_note","arguments":{"note_id":"Concepts/Fare-Quote.md"},"revision":"22050ecb45f1a83467fc2aba8d628e8f346b9a577044fda08c634de45b0523d9","head":"311d1a76802a0a75090381caff8073eeb4bffab2","status":"planned","source":"drive2u/docs/app-requirements.md — FR-03, FR-04, FR-06, FR-10"},{"tool":"get_note","arguments":{"note_id":"Components/Backend-API.md"},"revision":"bf39934c5ed3ae3a8d890517f3f04802a08ff1422c14335ae3efcd8c1459d586","head":"311d1a76802a0a75090381caff8073eeb4bffab2","status":"planned","source":"drive2u/docs/app-requirements.md — FR-01–FR-10; розділи 5–8; drive2u@7147aba786978b2aec6411294d5837313d2b7dde: server/Drive2U.Api/FareEstimatesController.cs, Program.cs; server/Drive2U.Fares/FareCalculator.cs, FareTariff.cs; server/README.md; docs/orchestration/backend-fare/verification.md"},{"tool":"get_note","arguments":{"note_id":"Concepts/Ride.md"},"revision":"2bdeaab241a2f163012a57194878e5ce14b505d3a067c9e5f7c9df93a55da962","head":"311d1a76802a0a75090381caff8073eeb4bffab2","status":"planned","source":"drive2u/docs/app-requirements.md — FR-04–FR-09; розділи 5–6; drive2u/docs/ontology.md"}],
+  "goal": "Analyze the implemented fare API through Planner → Reviewer without API/code/corpus changes.",
+  "scope": [
+    "Read existing fare implementation, tests, requirements and MCP notes; distinguish calculator from planned Fare-Quote.",
+    "Current user analysis-only scope overrides historical implementation next_action in planner.md."
+  ],
+  "acceptance_criteria": [
+    "Document exact HTTP contract and validation with code evidence.",
+    "Record actual semantic retrieval arguments/results and read found notes through MCP.",
+    "Reviewer independently verifies claims; no Coder or implementation changes."
+  ],
+  "initial_sha": "d13931d4b87eae022ae54898e90c218c70f5807e",
+  "sources": [
+    {
+      "path": "harness/orchestration/roles/planner.md"
+    },
+    {
+      "path": "harness/orchestration/handoff.schema.json"
+    },
+    {
+      "path": "docs/orchestration/backend-fare/task.md"
+    },
+    {
+      "path": "docs/app-requirements.md",
+      "section": "FR-03"
+    },
+    {
+      "path": "docs/guardrails.md"
+    },
+    {
+      "path": "docs/harness-requirements.md"
+    },
+    {
+      "path": "docs/ontology.md"
+    },
+    {
+      "path": "server/Drive2U.Api/Program.cs"
+    },
+    {
+      "path": "server/Drive2U.Api/FareEstimatesController.cs"
+    },
+    {
+      "path": "server/Drive2U.Fares/FareCalculator.cs"
+    },
+    {
+      "path": "server/Drive2U.Fares/FareTariff.cs"
+    },
+    {
+      "path": "server/Drive2U.Tests/FareApiTests.cs"
+    },
+    {
+      "path": "server/Drive2U.Tests/FareCalculatorTests.cs"
+    },
+    {
+      "path": "server/README.md"
+    },
+    {
+      "tool": "get_note",
+      "arguments": {
+        "note_id": "Conventions.md"
+      },
+      "revision": "a1c673177135b4f29f7bf92f397e28da7a639633ed8d761d4fce418ea435da6d",
+      "head": "311d1a76802a0a75090381caff8073eeb4bffab2"
+    },
+    {
+      "tool": "get_note",
+      "arguments": {
+        "note_id": "Components/Knowledge-Connector.md"
+      },
+      "revision": "eb6effe3c7482968bbb1f109d863e981d927bc374a36b98839bfcbfdea58c7ff",
+      "head": "311d1a76802a0a75090381caff8073eeb4bffab2"
+    },
+    {
+      "path": "docs/retrieval/orchestration/planner-retrieval.json",
+      "description": "Verbatim MCP responses and call arguments"
+    }
+  ],
+  "confirmed_facts": [
+    "GET /health returns 200 {status:ok}. POST /api/fare-estimates consumes application/json with only numeric distanceKm > 0; output 200 has distanceKm, amount, currency UAH.",
+    "Server tariff mandatory nonnegative BaseFare/RatePerKm validated at startup; immutable FareTariff and singleton FareCalculator. Client cannot override tariff, amount or currency: unknown JSON members disallowed.",
+    "Decimal checked BaseFare + distanceKm * RatePerKm, rounded once to 2 decimals AwayFromZero. Synthetic 40/12, distance 2.5 => 70 UAH; 1.005 => 1.01 with tariff 0/1.",
+    "Missing/null/malformed/non-numeric/string/nonpositive/out-of-range/overflow requests return 400 validation ProblemDetails without parser/exception details, as implemented and covered by source tests.",
+    "Implemented calculator trusts client distance solely as demonstration input. Full FR-03 needs server routing distance and Fare-Quote identity, expiry, coordinates and tariff snapshot; these are absent. No claim of full FR-03 completion.",
+    "Test source inspected, no build/test/runtime execution by Planner. Existing unrelated changes preserved.",
+    "Knowledge-Connector note records text retrieval/version 1.3.0 and historical INVALID_YAML; health now confirms 1.4.0. Current semantic search status must be evidenced independently."
+  ],
+  "decisions": [
+    {
+      "decision": "Review existing calculator contract only; do not implement Fare-Quote.",
+      "rationale": "Current user task is an analysis-only demonstration; FR-03 remains planned beyond this calculator."
+    },
+    {
+      "decision": "Preserve corpus and unrelated worktree changes.",
+      "rationale": "MCP retrieval only, no ingestion or direct vault reads."
+    }
+  ],
+  "allowed_changes": [
+    "Only analysis evidence under docs/retrieval/orchestration/."
+  ],
+  "forbidden_changes": [
+    "API/code/server changes",
+    "Vault writes/ingestion",
+    "Direct vault filesystem access",
+    "Connector, roles, schemas, hooks or global config changes",
+    "Commit/push/merge"
+  ],
+  "changed_files": [
+    "docs/retrieval/orchestration/planner-handoff.json",
+    "docs/retrieval/orchestration/planner-retrieval.json"
+  ],
+  "checks": [
+    {
+      "command": "git rev-parse HEAD; git branch --show-current; git status --short",
+      "result": "HEAD d13931d4b87eae022ae54898e90c218c70f5807e on feat/semantic-retrieval; unrelated connector and temporary changes present and untouched; raw initial status retained."
+    },
+    {
+      "command": "health_check({})",
+      "result": "ok=true version=1.4.0 note_count=19 writer_busy=false pending_push=false; git not checked by health."
+    },
+    {
+      "command": "search_notes (three actual semantic attempts; arguments retained in raw evidence)",
+      "result": "Three busy errors and one 300s timeout retained; final authorized retry succeeded mode=semantic. All three unique returned note IDs read successfully via get_note with revisions matching search. No text fallback."
+    },
+    {
+      "command": "Read fare API/calculator/test sources",
+      "result": "Static contract confirmed; tests not executed by Planner. Both evidence JSON files parse; standard-library validation of schema required fields, property/item types, nested required fields, role enum and SHA pattern passed. Full jsonschema validator could not run because the optional package is unavailable; no dependency installed."
+    }
+  ],
+  "risks": [
+    "Cold semantic worker timed out at 300s; subsequent authorized retry succeeded. Search elapsed_ms=236.29 is server search time, not cold-start latency.",
+    "Read calls are atomic per file, not a corpus snapshot; health does not prove clean tree.",
+    "Knowledge-Connector documentation is stale relative to live health; retained rather than edited."
+  ],
+  "open_questions": [],
+  "next_action": "Coordinator accepts Planner evidence and starts independent Reviewer. No Coder/API changes.",
+  "outcome": "Planner complete: exact existing calculator contract and successful semantic retrieval with all found notes read; ready for coordinator acceptance and independent Reviewer.",
+  "semantic_confirmation": ["Successful actual search mode=semantic, intfloat/multilingual-e5-small@614241f622f53c4eeff9890bdc4f31cfecc418b3, corpus_revision=5e76ba691dcb85fc80b559e665e2a6fc9ae2273e39c84a01b048ed83f094c48e, index_updates changed=0 removed=0. Cosine similarity is not confidence.","All three unique returned note IDs were read successfully through MCP. Backend-API confirms implemented partial calculator; Fare-Quote and Ride describe planned business behavior. Retrieved revisions match the search revisions, all at vault head 311d1a76802a0a75090381caff8073eeb4bffab2.","No ingestion or other corpus writes performed. Search supplies all 19 note revisions for coordinator comparison against corpus-before.json; unchanged head and index_updates alone are not a git clean-tree proof."]
+}

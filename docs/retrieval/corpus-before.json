@@ -1,0 +1,121 @@
+{
+  "results": [
+    {
+      "note_id": "MOC-Drive2U.md",
+      "revision": "42bf9b49e03fd1388852ecf5bd630d099a402a814bbbc63cc7ff31048342aa80",
+      "excerpt": "---\ntype: moc\ncreated: 2026-10-22\nupdated: 2026-10-24\nstatus: active\ntags: [drive2u, moc]\nsource: \"drive2u/docs/app-requirements.md\"\n---\n  \n# Drive2U — карта знань\n## Правила бази знань\n\n- [[Conventions|Конвенції та шаблони нотаток]]\n- [[Project-Glossary|Глосарій]]\n\n## Предметна область\n\n- [[Passeng",
+      "name_match": true
+    },
+    {
+      "note_id": "Components/Backend-API.md",
+      "revision": "bf39934c5ed3ae3a8d890517f3f04802a08ff1422c14335ae3efcd8c1459d586",
+      "excerpt": "pe: component\ncreated: 2026-10-22\nupdated: '2026-10-24'\nstatus: planned\ntags:\n- drive2u\n- component\nsource: 'drive2u/docs/app-requirements.md — FR-01–FR-10; розділи 5–8; drive2u@7147aba786978b2aec6411294d5837313d2b7dde:\n  server/Drive2U.Api/FareEstimatesController.cs, Program.cs; server/Drive2U.Fare",
+      "name_match": false
+    },
+    {
+      "note_id": "Components/Change-236eea02af6c.md",
+      "revision": "356da8bbfc0b1db91a18c6c2bd5b3e1e0c3aabd9e28b7bee64aee2f623075d0a",
+      "excerpt": "-\ntype: component\ncreated: 2026-10-24\nupdated: 2026-10-24\nstatus: active\ntags: [drive2u, component]\nsource: https://github.com/MrLazYT/Drive2U/commit/236eea02af6c70df0240091503c7e02f79a4ba78;\n  drive2u/docs/ontology.md\n---\n\n# Додавання MCP-конектора бази знань\n\n## Подія\nПовний SHA: 236eea02af6c70df0",
+      "name_match": false
+    },
+    {
+      "note_id": "Components/Change-c088c2027139.md",
+      "revision": "ca58b8f12c1608e1f6e19ab32514d8ffa09690dbe4a39421ff2b02a51e1a5ccc",
+      "excerpt": "-\ntype: component\ncreated: 2026-10-24\nupdated: 2026-10-24\nstatus: active\ntags: [drive2u, component]\nsource: https://github.com/MrLazYT/Drive2U/commit/c088c202713956dca588ab82adcdf17e06adb986;\n  drive2u/docs/ontology.md\n---\n\n# Початкові вимоги Drive2U\n\n## Подія\nПовний SHA: c088c202713956dca588ab82adc",
+      "name_match": false
+    },
+    {
+      "note_id": "Components/Guardrails-Policy.md",
+      "revision": "0d3450a5d2a63f519c8f2fe55369d7f72e5a2fd1c54030cbf02142f04e1062cb",
+      "excerpt": "-\ntype: component\ncreated: 2026-10-24\nupdated: 2026-10-24\nstatus: active\ntags: [drive2u, component]\nsource: 'drive2u@5884f32ca4c8d2032aad403c7335dd9cc4ef5f14: harness/guardrails/pre-tool-use.ps1,\n  test_guardrails.py; docs/guardrails.md; docs/guardrails-test-cases.md; docs/skills-verification.md\n  R",
+      "name_match": false
+    },
+    {
+      "note_id": "Components/Knowledge-Connector.md",
+      "revision": "eb6effe3c7482968bbb1f109d863e981d927bc374a36b98839bfcbfdea58c7ff",
+      "excerpt": "-\ntype: component\ncreated: 2026-10-23\nupdated: 2026-10-24\nstatus: active\ntags: [drive2u, component]\nsource: 'drive2u/harness/knowledge-mcp/README.md; підтверджені MCP-виклики версії\n  1.2.0; drive2u/docs/ontology.md; drive2u@5884f32ca4c8d2032aad403c7335dd9cc4ef5f14:\n  harness/knowledge-mcp/knowledge",
+      "name_match": false
+    },
+    {
+      "note_id": "Components/Mapping-Integration.md",
+      "revision": "f110afb8302657ace6de1fc7db3f28ff55c8d91d01f57293081619c6c4d109e4",
+      "excerpt": "\ntype: component\ncreated: 2026-10-22\nupdated: 2026-10-24\nstatus: planned\ntags: [drive2u, component]\nsource: \"drive2u/docs/app-requirements.md — FR-02, FR-03; розділи 7–8\"\n---\n\n# Мапа, адреси та маршрутизація\n\n## Відповідальність\nІнтеграція складається з трьох можливостей: відображення мапи, пошук/ви",
+      "name_match": false
+    },
+    {
+      "note_id": "Components/Mobile-Application.md",
+      "revision": "06a203a1d5822ba4df9ccdce5113ba03e54f00354fe7a66228ee1b12439b5128",
+      "excerpt": "\ntype: component\ncreated: 2026-10-22\nupdated: 2026-10-24\nstatus: planned\ntags: [drive2u, component]\nsource: \"drive2u/docs/app-requirements.md — FR-01–FR-09; розділи 7–8\"\n---\n\n# Мобільний застосунок\n\n## Відповідальність\nКлієнт React Native + Expo + TypeScript для Android. Надає рольові інтерфейси [[P",
+      "name_match": false
+    },
+    {
+      "note_id": "Components/Realtime-Updates.md",
+      "revision": "e0cb9c811d205f587657a347d3712350f0449dde40539f6890e6d84eb3ea57d0",
+      "excerpt": "\ntype: component\ncreated: 2026-10-22\nupdated: 2026-10-24\nstatus: planned\ntags: [drive2u, component]\nsource: \"drive2u/docs/app-requirements.md — FR-08; розділ 8\"\n---\n\n# Оновлення стану в реальному часі\n\n## Відповідальність\nSignalR повідомляє учасників [[Ride]] про вже збережені зміни стану. Він допов",
+      "name_match": false
+    },
+    {
+      "note_id": "Concepts/Driver.md",
+      "revision": "1692a4011d63019206b703e279e050345567035e0e772ff3c3adb3267e64ecd6",
+      "excerpt": "--\ntype: concept\ncreated: 2026-10-22\nupdated: 2026-10-24\nstatus: planned\ntags: [drive2u, concept]\nsource: \"drive2u/docs/app-requirements.md — FR-01, FR-05, FR-06, FR-07\"\n---\n\n# Водій\n\n## Визначення\nВодій — користувач з активованим профілем, допущений до виконання [[Ride]]. Профіль містить ім’я та ав",
+      "name_match": false
+    },
+    {
+      "note_id": "Concepts/Fare-Quote.md",
+      "revision": "22050ecb45f1a83467fc2aba8d628e8f346b9a577044fda08c634de45b0523d9",
+      "excerpt": "--\ntype: concept\ncreated: 2026-10-22\nupdated: 2026-10-24\nstatus: planned\ntags: [drive2u, concept]\nsource: \"drive2u/docs/app-requirements.md — FR-03, FR-04, FR-06, FR-10\"\n---\n\n# Пропозиція ціни\n\n## Визначення\nFareQuote — пропозиція ціни для конкретних точок [[Route]] з ідентифікатором, строком дії, с",
+      "name_match": false
+    },
+    {
+      "note_id": "Concepts/Passenger.md",
+      "revision": "c9875ba837e41b33c50084ecdcad16155ac81bcb0be6e84c0071dc7d5e403bcf",
+      "excerpt": "--\ntype: concept\ncreated: 2026-10-22\nupdated: 2026-10-24\nstatus: planned\ntags: [drive2u, concept]\nsource: \"drive2u/docs/app-requirements.md — FR-01, FR-02, FR-04, FR-07, FR-09\"\n---\n\n# Пасажир\n\n## Визначення\nПасажир — авторизований користувач, який замовляє перевезення. Його інтерфейс надає [[Mobile-",
+      "name_match": false
+    },
+    {
+      "note_id": "Concepts/Ride-Lifecycle.md",
+      "revision": "d8bd7e877838fe69447de968b7650c358cd631d671122b5d17f8ece9078e8553",
+      "excerpt": "--\ntype: concept\ncreated: 2026-10-22\nupdated: 2026-10-24\nstatus: planned\ntags: [drive2u, concept]\nsource: \"drive2u/docs/app-requirements.md — FR-05–FR-08; розділ 5\"\n---\n\n# Життєвий цикл замовлення\n\n## Стани та переходи\n| Початковий стан | Новий стан | Хто виконує                           |\n| ------",
+      "name_match": false
+    },
+    {
+      "note_id": "Concepts/Ride.md",
+      "revision": "2bdeaab241a2f163012a57194878e5ce14b505d3a067c9e5f7c9df93a55da962",
+      "excerpt": "--\ntype: concept\ncreated: 2026-10-22\nupdated: 2026-10-24\nstatus: planned\ntags: [drive2u, concept]\nsource: drive2u/docs/app-requirements.md — FR-04–FR-09; розділи 5–6; drive2u/docs/ontology.md\n---\n\n# Замовлення поїздки\n\n## Визначення\nRide — замовлення перевезення від [[Passenger]] з погодженою ціною ",
+      "name_match": false
+    },
+    {
+      "note_id": "Concepts/Route.md",
+      "revision": "a2cdcb6bdcbf7734de453e95079dd0f8fcca21232d97e99b1343de2f8cb67978",
+      "excerpt": "--\ntype: concept\ncreated: 2026-10-22\nupdated: 2026-10-24\nstatus: planned\ntags: [drive2u, concept]\nsource: \"drive2u/docs/app-requirements.md — FR-02, FR-03, FR-06; розділи 7–8\"\n---\n\n# Маршрут\n\n## Визначення\nМаршрут — автомобільний шлях між точками подачі та призначення. Він включає координати, тексто",
+      "name_match": false
+    },
+    {
+      "note_id": "Conventions.md",
+      "revision": "a1c673177135b4f29f7bf92f397e28da7a639633ed8d761d4fce418ea435da6d",
+      "excerpt": "\ntype: convention\ncreated: 2026-10-22\nupdated: 2026-10-24\nstatus: active\ntags: [drive2u, convention]\nsource: drive2u/docs/harness-requirements.md — розділи 3–5, 8; drive2u/docs/ontology.md\n---\n\n# Конвенції бази знань\n## Призначення\nЗабезпечити однакову структуру нотаток для людини та MCP-конектора. ",
+      "name_match": false
+    },
+    {
+      "note_id": "Decisions/ADR-001-Technology-Stack.md",
+      "revision": "712a3ee5dbe6812271dadcf2f9cb2067244cf4a1aa0fd0ef194b9e13fa168b50",
+      "excerpt": "\ntype: decision\ncreated: 2026-10-22\nupdated: 2026-10-24\nstatus: accepted\ntags: [drive2u, decision]\nsource: \"drive2u/ЗАВДАННЯ.md; drive2u/docs/app-requirements.md — розділ 8\"\ndecision_id: ADR-001\n---\n\n# ADR-001 — технологічний стек\n\n## Контекст\nDrive2U має мобільні інтерфейси пасажира й водія, [[Rout",
+      "name_match": false
+    },
+    {
+      "note_id": "Decisions/ADR-002-Server-Authority.md",
+      "revision": "e387b603c579096ae4fabafd62104ab605602debd40cdadeb552bb107fd5e55d",
+      "excerpt": "\ntype: decision\ncreated: 2026-10-22\nupdated: 2026-10-24\nstatus: accepted\ntags: [drive2u, decision]\nsource: \"drive2u/docs/app-requirements.md — FR-01, FR-03–FR-08; розділи 5, 8\"\ndecision_id: ADR-002\n---\n\n# ADR-002 — серверний контроль бізнес-правил\n## Контекст\nМобільний клієнт перебуває поза довірено",
+      "name_match": false
+    },
+    {
+      "note_id": "Glossary/Project-Glossary.md",
+      "revision": "afc7e88ffc9ce10b05eb2b44d4b70fcc3cb00ece4da4af3476b9fca2b4211d40",
+      "excerpt": "-\ntype: glossary\ncreated: 2026-10-22\nupdated: 2026-10-24\nstatus: planned\ntags: [drive2u, glossary]\nsource: \"drive2u/docs/app-requirements.md; drive2u/docs/harness-requirements.md\"\n---\n\n# Глосарій Drive2U\n| Термін              | Визначення                                                              ",
+      "name_match": false
+    }
+  ],
+  "total": 19,
+  "head": "311d1a76802a0a75090381caff8073eeb4bffab2",
+  "consistency": "per-file local snapshot"
+}

@@ -24,7 +24,8 @@ def test_stdio_tools(tmp_path):
     async def run():
         params=StdioServerParameters(command=sys.executable,
             args=[str(Path(__file__).resolve().parents[1]/'server.py')],
-            env={**os.environ,'DRIVE2U_APP_ROOT':str(app),'DRIVE2U_VAULT_ROOT':str(root),'KNOWLEDGE_ALLOW_WRITE':'1'})
+            env={**os.environ,'DRIVE2U_APP_ROOT':str(app),'DRIVE2U_VAULT_ROOT':str(root),'KNOWLEDGE_ALLOW_WRITE':'1',
+                 'KNOWLEDGE_RETRIEVAL_MODE':'text'})
         async with stdio_client(params) as (read,write):
             async with ClientSession(read,write) as session:
                 await session.initialize()
@@ -33,7 +34,7 @@ def test_stdio_tools(tmp_path):
                 h=await session.call_tool('health_check',{})
                 assert not h.isError
                 health=h.structuredContent or json.loads(h.content[0].text)
-                assert health['version']=='1.3.1'
+                assert health['version']=='1.4.0'
                 for title in ['Transport-Read','Transport-Search','Transport-Write']:
                     args={'title':title,'note_type':'concept','content':f'# {title}\nSynthetic protocol fixture.\n\n---\nBody---text.', 'source':'synthetic---integration test'}
                     first=await session.call_tool('ingest_note',args)

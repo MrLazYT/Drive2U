@@ -72,7 +72,7 @@ def test_create_get_search_repeat_update(setup):
     assert first['status']=='created' and first['published']
     assert git(remote,'rev-parse','main')==first['commit']
     assert '[[Ride]]' in v.read('MOC-Drive2U.md')
-    assert v.search('ride')['total']==2
+    assert v.text_search('ride')['total']==2
     assert v.get('Concepts/Ride.md')['metadata']['type']=='concept'
     assert create(v)['status']=='unchanged'
     assert git(v.root,'rev-parse','HEAD')==first['commit']
@@ -271,7 +271,7 @@ def test_reads_work_while_other_process_holds_writer_lock(setup):
     with other:
         assert v.health()['writer_busy'] is True
         assert v.get('Concepts/Ride.md')['content']
-        assert v.search('Ride')['total']==2
+        assert v.text_search('Ride')['total']==2
         from filelock import Timeout
         with pytest.raises(Timeout):create(v,title='Other')
 
@@ -282,7 +282,7 @@ def test_health_and_reads_do_not_run_git(setup,monkeypatch):
     monkeypatch.setattr(v,'git',forbidden)
     assert v.health()['ok']
     assert v.get('Concepts/Ride.md')['note_id']=='Concepts/Ride.md'
-    assert v.search('Ride')['total']==2
+    assert v.text_search('Ride')['total']==2
 
 
 def test_git_does_not_wait_for_inherited_stdout(setup,monkeypatch):

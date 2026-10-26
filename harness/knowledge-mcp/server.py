@@ -45,7 +45,10 @@ def get_note(note_id: str) -> dict:
 
 @mcp.tool(annotations=ToolAnnotations(readOnlyHint=True, openWorldHint=False))
 def search_notes(query: str, limit: int = 10) -> dict:
-    """Search local allowed Markdown notes by text/name (not embeddings). limit 1..50. Does not fetch git."""
+    """Search allowed local note fragments by semantic similarity (not confidence). limit 1..50.
+    Returns current revisions, excerpt/text, section, source and cosine score. No git or network.
+    Explicit diagnostic KNOWLEDGE_RETRIEVAL_MODE=text is labelled; errors never silently fall back.
+    """
     return invoke('search', query, limit)
 
 
@@ -67,6 +70,16 @@ def ingest_note(title: str, note_type: str, content: str, source: str,
 
 
 if __name__ == '__main__':
+    # Windows native ML extensions can hang in the DLL loader if first imported
+    # after AnyIO starts STDIO reader threads (reproduced with NumPy and SciPy).
+    # Import dependencies before readers; no model construction, weights or index.
+    if os.name == 'nt' and os.environ.get('KNOWLEDGE_RETRIEVAL_MODE', 'semantic') == 'semantic':
+        try:
+            import sentence_transformers
+        except ImportError:
+            # Health/get remain usable without optional ML dependencies. A semantic
+            # call will report its explicit model-load error through invoke().
+            pass
     try:
         vault()
     except Exception:

@@ -1,3 +1,55 @@
+# Update 1.4.0 — local semantic retrieval
+
+`search_notes(query, limit=10)` тепер за замовчуванням використовує локальну
+multilingual E5 small (`614241f622f53c4eeff9890bdc4f31cfecc418b3`, MIT) на CPU
+та persistent SQLite з точним cosine ranking. Нотатки не надсилаються зовнішнім
+сервісам. Модель завантажується окремо, без API-ключів і `trust_remote_code`.
+`get_note` читає актуальний повний Markdown; health не завантажує модель/індекс.
+На Windows залежності Sentence Transformers (зокрема NumPy/SciPy) імпортуються
+перед запуском STDIO reader threads для уникнення зависання native extension
+import; це не завантаження embedding-моделі. Перший startup має окрему вартість.
+
+Підготовка в цільовому `.venv` (наявні app/vault environment roots):
+
+```powershell
+harness/knowledge-mcp/.venv/Scripts/python.exe -m pip install -r harness/knowledge-mcp/requirements.txt
+harness/knowledge-mcp/.venv/Scripts/python.exe -B harness/knowledge-mcp/prepare_model.py
+harness/knowledge-mcp/.venv/Scripts/python.exe -B harness/knowledge-mcp/build_index.py
+```
+
+Ваги (~493 MB із tokenizer) — `.knowledge-models/<revision>/`, індекс —
+`.knowledge-index/vectors.sqlite3` у корені застосунку; обидва каталоги в
+`.gitignore`. Індекс відновлюється командою `build_index.py --rebuild`.
+Server maintenance використовує ті самі Vault path/metadata checks і не є
+додатковим файловим інструментом для агента. Не видаляйте lock під час роботи.
+
+Додавання/зміна/видалення нотаток перевіряється при кожному пошуку; embeddings
+перераховуються лише для змінених нотаток. Зміна моделі/chunking потребує rebuild.
+Пошкодження, відсутня модель, busy та зміна корпусу під час запиту повертають явну
+помилку. Прихованого fallback немає. `KNOWLEDGE_RETRIEVAL_MODE=text` — лише явно
+позначений діагностичний режим; default — `semantic`.
+
+Збережені `results/total/head/consistency` та `note_id/revision/excerpt/name_match`.
+Додані `text/title/section/chunk_id/source/score/score_kind`, `mode/model`,
+`corpus_revision/note_revisions/index_updates/elapsed_ms/ranking`. `total` рахує
+chunks; одна нотатка може мати кілька результатів. `score` — cosine similarity,
+не ймовірність правильності. Query: непорожній, до 200 символів; limit: 1..50.
+Детальний [design](../../docs/retrieval/design.md), незмінні питання та фактичне
+[порівняння](../../docs/retrieval/comparison.md), [перевірки](../../docs/retrieval/verification.md).
+
+Звичайні тести використовують synthetic vault + fake embedder. Реальна модель
+перевіряється окремо, один раз на STDIO-процес, без автоматичного download:
+
+```powershell
+$env:KNOWLEDGE_REAL_MODEL_TEST='1'
+harness/knowledge-mcp/.venv/Scripts/python.exe -B -m pytest harness/knowledge-mcp/tests/test_semantic_stdio.py -q
+```
+
+Після оновлення коду потрібен новий процес MCP: закрийте Codex CLI після завершення
+викликів, запустіть `codex` з workspace, перевірте health **1.4.0** та реальний
+search із `mode=semantic`. Config, hooks і GitHub MCP змінювати не потрібно.
+Наведені нижче version-specific інструкції є історією, не поточним контрактом.
+
 # Update 1.3.1 — межі YAML frontmatter
 
 Парсер розпізнає opening/closing `---` лише як окремий рядок. Послідовність
