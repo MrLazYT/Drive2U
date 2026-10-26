@@ -1,6 +1,6 @@
 # Semantic retrieval verification
 
-Work in progress. No evaluation or implementation success is claimed here.
+Completed after the historical stages below; see final sync completion evidence.
 
 Initial app SHA: `d13931d4b87eae022ae54898e90c218c70f5807e`.
 Branch created from `feat/fix-knowledge-yaml`: `feat/semantic-retrieval`.
@@ -170,3 +170,47 @@ continuation.md. This is a saved intermediate result, not completion of the full
 
 Role handoffs validate against the unchanged handoff.schema.json using the target
 .venv jsonschema package; every evidence JSON parsed successfully.
+
+## Final sync completion — 2026-10-26
+
+Applied drive2u-sync-knowledge with the existing write/publication authorization.
+Read guardrails, ontology, Conventions, source/design and current target via MCP.
+Live health: 1.4.0, write_enabled=true, writer_busy=false, pending_push=false.
+Initial search returned SEMANTIC_INDEX_BUSY. Windows Restart Manager read-only
+RmGetList reported exactly one index.lock owner: Python PID2936, parent23404,
+server.py started15:10:50+02:00, before final server.py modification15:17:54.
+After approved escalation, PID/parent/command were checked again; only PID2936
+was stopped. Other Python processes were untouched. No locks deleted, no rebuild.
+
+New backend PID4284 (parent2896) started15:41:43+02:00, after the final startup fix.
+Native module inspection and successful live health/read/semantic calls accompanied
+the timestamp check; git diff from be24e88 for server.py/semantic.py was empty.
+This is process/source evidence, not an unavailable runtime code-attestation API.
+The active search uses pinned E5 revision614241f622f53c4eeff9890bdc4f31cfecc418b3.
+All19 notes were read again via MCP before ingestion; their revisions matched the
+search manifest and frozen corpus_revision5e76ba691dcb85fc80b559e665e2a6fc9ae2273e39c84a01b048ed83f094c48e.
+No benchmark rerun or change to baseline/questions/criteria/results was needed.
+
+Updated Components/Knowledge-Connector.md from revision
+eb6effe3c7482968bbb1f109d863e981d927bc374a36b98839bfcbfdea58c7ff to
+2c394de9c21722e87329e80a5678900a2c86853deba24d6ac6f02e28bc5dcced.
+Preserved prior content, provenance, related notes and governed_by Conventions;
+the linked Backend-API and Conventions were read through MCP. Corrected historical
+INVALID_YAML, described E5/SQLite exact cosine scan, chunks, freshness/errors,
+Windows dependency preload costs and historical test results. Recorded source
+coverage regression51.67→36.67%, answer completeness65→61.67%, relevance40→40%,
+mean latency56.7→261.2ms, with no claim of overall semantic superiority or ready Fare-Quote.
+
+ingest_note returned updated, commit6a988a46e064a58b3559106fc6db643064ef13ea,
+published=true. get_note body/type/status/source/revision matched submitted content.
+Exact retry reused every original argument including expected_revision/source:
+unchanged, same revision/commit, published=true. No additional commit.
+Post-sync semantic search returned the new note revision and newly added content,
+index_updates changed1/removed0; repeated search changed0/removed0. Corpus revision
+is now c8c6d1d1f509ec9aabaa7085a3986a806c07c8c6c6a0ef90dac7c0dbeabea1dd.
+MOC readback remained42bf9b49e03fd1388852ecf5bd630d099a402a814bbbc63cc7ff31048342aa80,
+matching both searches. Final health writer idle, no pending push. No vault FS/git access.
+
+Exact ingest arguments, raw responses, readbacks, corpus checks and search evidence
+are in knowledge-sync-completion.json. knowledge-sync.json preserves the earlier
+failed preflight and links this completion. No implementation files changed here.

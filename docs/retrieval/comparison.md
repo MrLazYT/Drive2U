@@ -105,5 +105,8 @@ Planner→Reviewer handoffs, raw semantic retrieval/readbacks and a transcript f
 implemented fare API analysis. Existing role instructions were used unchanged; API
 code was only read. [knowledge-sync.json](knowledge-sync.json) records the subsequent
 authorized Knowledge-Connector sync preflight, stopped by an old-process busy lock.
-No vault update has occurred; published/readback/unchanged and post-sync indexing
-remain pending. [continuation.md](continuation.md) gives exact restart/continuation.
+The later [completion evidence](knowledge-sync-completion.json) confirms the
+post-comparison sync: published=true, matching readback, exact unchanged retry and
+fresh semantic revisions. The frozen comparison above remains unchanged; the sync
+subsequently changed Knowledge-Connector, so its new corpus is not the benchmark corpus.
+[continuation.md](continuation.md) preserves the historical restart handoff.

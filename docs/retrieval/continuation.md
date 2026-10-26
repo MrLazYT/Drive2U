@@ -1,4 +1,16 @@
-# Finish knowledge sync after replacing old MCP processes
+# Knowledge sync completed — 2026-10-26
+
+The restart handoff below is historical. Completion is recorded in
+`knowledge-sync-completion.json` and the final section of `verification.md`.
+Active MCP 1.4.0 semantic search succeeded after Windows Restart Manager identified
+the sole stale index-lock owner PID 2936; only that verified pre-fix MCP was stopped
+with approval. No lock files were removed and no index rebuild was needed.
+Knowledge-Connector published commit `6a988a46e064a58b3559106fc6db643064ef13ea`;
+readback matched, exact original-argument retry returned unchanged/published=true,
+and semantic search indexed the current revision with 1 changed/0 removed followed
+by 0 changed/0 removed. MOC remained unchanged. No pending sync remains.
+
+## Historical restart handoff (preserved evidence)
 
 Implementation/evaluation commit: `be24e88ef05239f5be6d07959184a5d28d40b6a9`.
 Working branch: `feat/semantic-retrieval`; no merge into main. Do not reset unrelated

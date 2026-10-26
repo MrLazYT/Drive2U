@@ -1,5 +1,6 @@
 {
-  "status": "incomplete: old MCP process holds semantic index lock",
+  "status": "completed: see knowledge-sync-completion.json; historical failed preflight retained below",
+  "completion_evidence": "knowledge-sync-completion.json",
   "skill": "drive2u-sync-knowledge",
   "source_code_sha": "be24e88ef05239f5be6d07959184a5d28d40b6a9",
   "target": "Components/Knowledge-Connector.md",
