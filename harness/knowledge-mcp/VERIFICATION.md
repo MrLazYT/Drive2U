@@ -1,3 +1,61 @@
+# Перевірка 1.3.1 — 2026-10-24
+
+Перед виправленням: regression quoted source з `---` — **1 failed**,
+KnowledgeError INVALID_YAML із початкового parse_note. Після виправлення:
+**42 passed, 3 skipped in 81.68s**, Windows/Python 3.13, одноразові локальні
+app/vault/bare remote. Окрема parser-група — 11 passed. Команда:
+
+```powershell
+& harness/knowledge-mcp/.venv/Scripts/python.exe -B -m pytest harness/knowledge-mcp/tests -q -ra -p no:cacheprovider --basetemp .tmp-yaml-full --tb=short
+```
+
+Підтверджено окремі рядки fences, source/body з `---`, LF/CRLF/BOM,
+block scalar, явні missing/malformed errors, незмінні paths/revisions/locks/git
+регресії та новий transport-процес health=1.3.1. Три пропуски: symlink без
+Windows-дозволу й два POSIX process-group cases. drive2u-review застосовано,
+нових знахідок немає; це не незалежний окремий агент.
+
+**Активний MCP усе ще 1.3.0**, а не 1.3.1. До перезапуску Conventions і
+Knowledge-Connector читаються, Backend-API/Fare-Quote/Route — INVALID_YAML.
+MCP-search показав NBSP U+00A0 у tags-відступах цих трьох нотаток;
+синтетичний аналог навмисно лишається INVALID_YAML у новому парсері.
+Не заявляється усунення всіх реальних YAML-помилок. Післяперезапускові
+читання та sync Backend-API ще не виконані; ingest не було.
+Повні докази, revisions, межі review та інструкція продовження:
+[knowledge-yaml-fix.md](../../docs/knowledge-yaml-fix.md).
+
+Нижче збережені попередні результати без переписування історії.
+
+# Перевірка 1.3.0 — 2026-10-24
+
+Windows/Python 3.13, одноразові локальні app/vault/bare remote.
+Команда PowerShell (новий унікальний temp замість недоступного стандартного
+каталогу pytest, де перший запуск отримав WinError 5 до виконання тестів):
+
+```powershell
+$env:PYTHONDONTWRITEBYTECODE='1'
+$testTemp = Join-Path $env:TEMP ('knowledge-conventions-' + [guid]::NewGuid().ToString('N'))
+& ./harness/knowledge-mcp/.venv/Scripts/python.exe -B -m pytest harness/knowledge-mcp/tests -q -p no:cacheprovider --basetemp $testTemp --tb=short
+```
+
+Фактично: **31 passed, 3 skipped in 87.73s**. Пропущені Windows symlink
+без дозволу ОС і два POSIX-тести керування процесами.
+
+Перевірено оновлення наявного кореневого Conventions.md з актуальною ревізією,
+збереження метаданих і попереднього тексту, commit/push до локального remote,
+відхилення застарілої ревізії без зміни файла/HEAD, повтор зі старою ревізією
+без нового коміту. Інші кореневі назви, довільний тип, зміна регістру назви
+і шляхи замість title відхилені. Перевірено writer lock та режим лише читання.
+Ці операції Conventions також перевірено через справжній MCP/STDIO.
+Наявні регресійні тести шляхів, fast-forward, ідемпотентності та відновлення
+після помилки commit/push пройшли.
+
+Стан реального vault: **очікує перезапуску MCP**. До нього Conventions.md
+не оновлювали. Після перезапуску перевірити health_check version=1.3.0,
+прочитати Conventions.md через get_note, зберегти його зміст і доповнити
+правилами типізованих зв'язків із docs/ontology.md через ingest_note
+з актуальною expected_revision. Перевірити published=true та повтор unchanged.
+
 # Перевірка 1.2.0 — 2026-10-23
 
 24 passed, Linux/Python 3.12. Додані два регресійні тести:

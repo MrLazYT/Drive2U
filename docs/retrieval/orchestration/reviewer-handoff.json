@@ -1,0 +1,184 @@
+{
+  "role": "reviewer",
+  "agent_id": "/root/fare_reviewer",
+  "goal": "Independently review implemented fare estimate API through accepted Planner handoff; analysis only.",
+  "scope": [
+    "server/ fare API, calculator and related tests/README; current working source equals HEAD for server/."
+  ],
+  "acceptance_criteria": [
+    "Verify exact HTTP contract, decimal and single final AwayFromZero rounding, startup config validation, safe overflow handling and honest demo boundaries.",
+    "Independently retrieve MCP context and record evidence; leave code/API/corpus unchanged."
+  ],
+  "initial_sha": "d13931d4b87eae022ae54898e90c218c70f5807e",
+  "sources": [
+    {
+      "path": "docs/retrieval/orchestration/planner-handoff.json"
+    },
+    {
+      "path": "harness/orchestration/roles/reviewer.md"
+    },
+    {
+      "path": "harness/orchestration/handoff.schema.json"
+    },
+    {
+      "path": ".agents/skills/drive2u-review/SKILL.md"
+    },
+    {
+      "path": "docs/orchestration/backend-fare/task.md"
+    },
+    {
+      "path": "ЗАВДАННЯ.md"
+    },
+    {
+      "path": "docs/app-requirements.md"
+    },
+    {
+      "path": "docs/harness-requirements.md"
+    },
+    {
+      "path": "docs/ontology.md"
+    },
+    {
+      "path": "docs/guardrails.md"
+    },
+    {
+      "path": "server/Drive2U.Api/Program.cs"
+    },
+    {
+      "path": "server/Drive2U.Api/FareEstimatesController.cs"
+    },
+    {
+      "path": "server/Drive2U.Api/FareTariffOptions.cs"
+    },
+    {
+      "path": "server/Drive2U.Fares/FareCalculator.cs"
+    },
+    {
+      "path": "server/Drive2U.Fares/FareTariff.cs"
+    },
+    {
+      "path": "server/Drive2U.Tests/FareCalculatorTests.cs"
+    },
+    {
+      "path": "server/Drive2U.Tests/FareApiTests.cs"
+    },
+    {
+      "path": "server/README.md"
+    },
+    {
+      "tool": "get_note",
+      "note_id": "Conventions.md",
+      "revision": "a1c673177135b4f29f7bf92f397e28da7a639633ed8d761d4fce418ea435da6d",
+      "source": "drive2u/docs/harness-requirements.md — розділи 3–5, 8; drive2u/docs/ontology.md",
+      "head": "311d1a76802a0a75090381caff8073eeb4bffab2"
+    },
+    {
+      "tool": "get_note",
+      "note_id": "Components/Knowledge-Connector.md",
+      "revision": "eb6effe3c7482968bbb1f109d863e981d927bc374a36b98839bfcbfdea58c7ff",
+      "source": "drive2u/harness/knowledge-mcp/README.md; підтверджені MCP-виклики версії 1.2.0; drive2u/docs/ontology.md; drive2u@5884f32ca4c8d2032aad403c7335dd9cc4ef5f14: harness/knowledge-mcp/knowledge.py, server.py, tests; docs/skills-verification.md R1/K1; MCP health_check 1.3.0 2026-10-24",
+      "head": "311d1a76802a0a75090381caff8073eeb4bffab2"
+    },
+    {
+      "tool": "get_note",
+      "note_id": "Concepts/Fare-Quote.md",
+      "revision": "22050ecb45f1a83467fc2aba8d628e8f346b9a577044fda08c634de45b0523d9",
+      "source": "drive2u/docs/app-requirements.md — FR-03, FR-04, FR-06, FR-10",
+      "head": "311d1a76802a0a75090381caff8073eeb4bffab2"
+    },
+    {
+      "tool": "get_note",
+      "note_id": "Components/Backend-API.md",
+      "revision": "bf39934c5ed3ae3a8d890517f3f04802a08ff1422c14335ae3efcd8c1459d586",
+      "source": "drive2u/docs/app-requirements.md — FR-01–FR-10; розділи 5–8; drive2u@7147aba786978b2aec6411294d5837313d2b7dde: server/Drive2U.Api/FareEstimatesController.cs, Program.cs; server/Drive2U.Fares/FareCalculator.cs, FareTariff.cs; server/README.md; docs/orchestration/backend-fare/verification.md",
+      "head": "311d1a76802a0a75090381caff8073eeb4bffab2"
+    },
+    {
+      "tool": "get_note",
+      "note_id": "Concepts/Ride.md",
+      "revision": "2bdeaab241a2f163012a57194878e5ce14b505d3a067c9e5f7c9df93a55da962",
+      "source": "drive2u/docs/app-requirements.md — FR-04–FR-09; розділи 5–6; drive2u/docs/ontology.md",
+      "head": "311d1a76802a0a75090381caff8073eeb4bffab2"
+    },
+    {
+      "path": "docs/retrieval/orchestration/reviewer-retrieval.json"
+    }
+  ],
+  "confirmed_facts": [
+    "GET /health returns status ok; POST /api/fare-estimates accepts numeric positive decimal distanceKm and returns distanceKm/amount/UAH. Strict JSON numbers and disallowed unmapped members reject client tariff/amount/currency overrides.",
+    "FareCalculator.cs uses decimal operands and checked BaseFare + distanceKm * RatePerKm, then exactly one decimal.Round(amount,2,MidpointRounding.AwayFromZero). Unit tests independently cover 1.005=>1.01 and 0.004+0.004=>0.01, preventing component rounding.",
+    "FareTariffOptions uses nullable decimal mandatory values. Program.cs validates both >=0 with ValidateOnStart; FareTariff constructor also rejects negatives. Binding malformed numeric config fails startup. Immutable tariff and singleton calculator hold server tariff.",
+    "Controller rejects null/missing/nonpositive input; MVC stable factory rejects malformed/out-of-range JSON; overflow is caught as 400 ValidationProblemDetails without exception details. Both multiplication and addition overflow are covered by calculator tests; HTTP source covers both paths.",
+    "Tests isolate each host from ambient tariff by clearing configuration sources and adding synthetic 40/12. Test source covers request override rejection, safe error body, midpoint, final sum, config startup and arithmetic overflow.",
+    "README and current Backend-API note explicitly identify client distance as untrusted demo input: no quoteId/expiry/server route/tariff snapshot/order confirmation. FR-03 remains incomplete, not a newly discovered defect.",
+    "Independent MCP health1.4.0 succeeded. Semantic query succeeded first call; all unique returned notes (Fare-Quote and Backend-API) independently read via get_note and revisions match. Ride additionally read. No ingestion or filesystem vault access.",
+    "No confirmed defects in scoped implemented demo contract. No server/ changes exist relative to HEAD; unrelated connector worktree modifications preserved."
+  ],
+  "decisions": [
+    {
+      "decision": "accepted",
+      "rationale": "Independent source review and live MCP context confirm Planner claims for the explicitly limited demo; no concrete failure path contradicts its contract."
+    },
+    {
+      "decision": "Do not rerun historical API tests",
+      "rationale": "Current request is analysis only; source tests inspected. Historical 37 passed is identified as historical, not a fresh result."
+    }
+  ],
+  "allowed_changes": [
+    "Review evidence only under docs/retrieval/orchestration/."
+  ],
+  "forbidden_changes": [
+    "Code/API/server edits",
+    "Corpus ingestion or direct vault filesystem access",
+    "Hooks/config/roles/schema edits",
+    "Commit/push/merge"
+  ],
+  "changed_files": [
+    "docs/retrieval/orchestration/reviewer-handoff.json",
+    "docs/retrieval/orchestration/reviewer-retrieval.json",
+    "docs/retrieval/orchestration/transcript.md"
+  ],
+  "checks": [
+    {
+      "command": "git rev-parse HEAD; git status --short; git diff -- server",
+      "result": "HEAD d13931d4b87eae022ae54898e90c218c70f5807e; server diff empty; unrelated connector and temporary modifications present and preserved."
+    },
+    {
+      "command": "Read scoped implementation/test/docs and accepted Planner handoff",
+      "result": "All five requested areas verified statically; no findings. AGENTS.md absent in repository search."
+    },
+    {
+      "command": "health_check; get_note Conventions/Knowledge-Connector",
+      "result": "Succeeded, raw responses retained."
+    },
+    {
+      "command": "search_notes semantic query then independent note reads",
+      "result": "Succeeded first attempt with semantic mode; two unique returned notes read independently; matching revisions/head/corpus evidence retained."
+    },
+    {
+      "command": "API build/test/live smoke",
+      "result": "Not run by this Reviewer. Historical 37 passed remains historical evidence."
+    }
+  ],
+  "risks": [
+    "No fresh build/test/runtime execution in this analysis-only review; historical 37 passed is historical evidence.",
+    "Read calls are atomic per file, not a corpus snapshot.",
+    "Knowledge-Connector note describes historical 1.3.0 text search; live 1.4.0 semantic result takes precedence.",
+    "Search took 87466.005 ms server-reported time; no timeout or retry in Reviewer call."
+  ],
+  "open_questions": [],
+  "next_action": "Coordinator validates and accepts Reviewer evidence; no Coder or API changes required.",
+  "outcome": "accepted",
+  "findings": [],
+  "semantic_confirmation": {
+    "mode": "semantic",
+    "model": "intfloat/multilingual-e5-small@614241f622f53c4eeff9890bdc4f31cfecc418b3",
+    "head": "311d1a76802a0a75090381caff8073eeb4bffab2",
+    "corpus_revision": "5e76ba691dcb85fc80b559e665e2a6fc9ae2273e39c84a01b048ed83f094c48e",
+    "index_updates": {
+      "changed": 0,
+      "removed": 0
+    },
+    "elapsed_ms": 87466.005
+  }
+}

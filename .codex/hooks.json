@@ -1,0 +1,14 @@
+{
+  "description": "Drive2U shell guardrail: review and trust via /hooks",
+  "hooks": {
+    "PreToolUse": [{
+      "matcher": "^Bash$",
+      "hooks": [{
+        "type": "command",
+        "command": "powershell.exe -NoProfile -NonInteractive -File \"D:/Projects/react-native/Drive2U/harness/guardrails/pre-tool-use.ps1\"",
+        "timeout": 5,
+        "statusMessage": "Checking Drive2U force-push policy"
+      }]
+    }]
+  }
+}

@@ -1,0 +1,9 @@
+/server/**/bin/
+/server/**/obj/
+/server/**/TestResults/
+/.knowledge-index/
+/.knowledge-models/
+/harness/knowledge-mcp/.venv/
+__pycache__/
+.pytest_cache/
+/.tmp-retrieval-*/

@@ -1,0 +1,189 @@
+{
+  "frozen_before_search_change": true,
+  "app_sha": "d13931d4b87eae022ae54898e90c218c70f5807e",
+  "corpus_head": "311d1a76802a0a75090381caff8073eeb4bffab2",
+  "limit": 5,
+  "protocol": "One fixed search query per question; get_note only for note_ids in that query's results. Answer solely from those results/readbacks, cite note_id and revision, distinguish planned from implemented, explicitly abstain if evidence is insufficient. No follow-up search or expected-source injection. Fresh fork_turns=none responder for each mode with inherited model/reasoning; sampling parameters not exposed by Codex. Query choices fixed before baseline, including short lexical queries and natural paraphrases. Compare same queries, limit and instructions.",
+  "rubric": {
+    "relevance": "precision@5: relevant returned note/chunk count divided by actual results count (0 for empty); relevance requires supporting a checked fact, not merely navigation links",
+    "coverage": "unique expected note_ids retrieved / expected note_ids count",
+    "answer": "each checked fact 0 absent/wrong, 0.5 partial, 1 explicit and supported; normalized mean",
+    "unsupported": "count factual assertions unsupported by retrieved excerpts or allowed readbacks; abstention is not hallucination"
+  },
+  "questions": [
+    {
+      "id": "Q1",
+      "category": "factual",
+      "question": "Хто визначає ціну поїздки та чи може клієнт підмінити тариф?",
+      "query": "ціну",
+      "limit": 5,
+      "expected_sources": [
+        "Components/Backend-API.md",
+        "Decisions/ADR-002-Server-Authority.md"
+      ],
+      "checked_facts": [
+        "Сервер визначає тариф і ціну",
+        "Клієнт не може задавати тариф",
+        "Повний довірений розрахунок відстані ще не реалізовано"
+      ],
+      "criteria": "Cover checked facts using retrieved evidence and revisions; label planned behavior; no invented implementation. Score per common rubric."
+    },
+    {
+      "id": "Q2",
+      "category": "factual",
+      "question": "Який порядок статусів поїздки та хто може їх змінювати?",
+      "query": "Ride-Lifecycle",
+      "limit": 5,
+      "expected_sources": [
+        "Concepts/Ride-Lifecycle.md"
+      ],
+      "checked_facts": [
+        "Waiting → Accepted → Arrived → InProgress → Completed",
+        "Лише призначений водій після прийняття",
+        "Кінцеві стани не змінюються; опис є планом"
+      ],
+      "criteria": "Cover checked facts using retrieved evidence and revisions; label planned behavior; no invented implementation. Score per common rubric."
+    },
+    {
+      "id": "Q3",
+      "category": "factual",
+      "question": "Які обмеження доступу до vault через MCP та які guardrails діють?",
+      "query": "MCP",
+      "limit": 5,
+      "expected_sources": [
+        "Components/Knowledge-Connector.md",
+        "Components/Guardrails-Policy.md",
+        "Conventions.md"
+      ],
+      "checked_facts": [
+        "Агент читає vault тільки через MCP",
+        "Заборонені traversal і symlink; дозволені папки",
+        "Force push заборонено; hook не універсальна ізоляція"
+      ],
+      "criteria": "Cover checked facts using retrieved evidence and revisions; label planned behavior; no invented implementation. Score per common rubric."
+    },
+    {
+      "id": "Q4",
+      "category": "paraphrased",
+      "question": "Де вирішують, скільки гривень має заплатити пасажир, якщо телефон надішле власні числа?",
+      "query": "скільки гривень",
+      "limit": 5,
+      "expected_sources": [
+        "Components/Backend-API.md",
+        "Concepts/Fare-Quote.md",
+        "Decisions/ADR-002-Server-Authority.md"
+      ],
+      "checked_facts": [
+        "Остаточний контроль серверний",
+        "Серверний тариф; клієнтські amount/currency відхиляються",
+        "Демонстраційний estimate приймає недовірену distanceKm"
+      ],
+      "criteria": "Cover checked facts using retrieved evidence and revisions; label planned behavior; no invented implementation. Score per common rubric."
+    },
+    {
+      "id": "Q5",
+      "category": "paraphrased",
+      "question": "Чи можна рахувати довжину шляху лінійкою між двома крапками, коли сервіс доріг не відповідає?",
+      "query": "лінійкою між",
+      "limit": 5,
+      "expected_sources": [
+        "Concepts/Route.md",
+        "Components/Mapping-Integration.md"
+      ],
+      "checked_facts": [
+        "Не підміняти дорожню відстань прямолінійною",
+        "Явна помилка; без маршруту немає погодженого замовлення",
+        "Постачальник ще не обраний"
+      ],
+      "criteria": "Cover checked facts using retrieved evidence and revisions; label planned behavior; no invented implementation. Score per common rubric."
+    },
+    {
+      "id": "Q6",
+      "category": "paraphrased",
+      "question": "Телефон був без мережі й не почув повідомлення про прибуття машини: як повернути правильний екран?",
+      "query": "не почув повідомлення",
+      "limit": 5,
+      "expected_sources": [
+        "Components/Realtime-Updates.md"
+      ],
+      "checked_facts": [
+        "Після перепідключення перечитати стан API",
+        "Відкидати застарілі версії",
+        "Втрата каналу не скасовує поїздку; це план"
+      ],
+      "criteria": "Cover checked facts using retrieved evidence and revisions; label planned behavior; no invented implementation. Score per common rubric."
+    },
+    {
+      "id": "Q7",
+      "category": "multi_note",
+      "question": "Як ролі й доступність водія пов’язані з одночасним прийняттям одного замовлення двома людьми?",
+      "query": "прийняття",
+      "limit": 5,
+      "expected_sources": [
+        "Concepts/Driver.md",
+        "Concepts/Ride-Lifecycle.md",
+        "Components/Backend-API.md"
+      ],
+      "checked_facts": [
+        "Активований профіль, авто, доступність і відсутність активної поїздки",
+        "Атомарне прийняття; один переможець; конфлікт 409",
+        "Транзакції та контроль версії є запланованими"
+      ],
+      "criteria": "Cover checked facts using retrieved evidence and revisions; label planned behavior; no invented implementation. Score per common rubric."
+    },
+    {
+      "id": "Q8",
+      "category": "multi_note",
+      "question": "Чим реалізований калькулятор fare-estimates відрізняється від Fare-Quote та як тут потрібна маршрутизація?",
+      "query": "Fare-Quote",
+      "limit": 5,
+      "expected_sources": [
+        "Components/Backend-API.md",
+        "Concepts/Fare-Quote.md",
+        "Components/Mapping-Integration.md"
+      ],
+      "checked_facts": [
+        "Є decimal estimate, UAH, серверний тариф, клієнтська distanceKm",
+        "Немає quoteId, TTL, серверної дорожньої відстані, фіксації замовлення",
+        "Повний Fare-Quote потребує серверного адаптера маршрутизації"
+      ],
+      "criteria": "Cover checked facts using retrieved evidence and revisions; label planned behavior; no invented implementation. Score per common rubric."
+    },
+    {
+      "id": "Q9",
+      "category": "multi_note",
+      "question": "Як серверний життєвий цикл узгоджується з realtime, якщо події запізнюються або губляться?",
+      "query": "стан",
+      "limit": 5,
+      "expected_sources": [
+        "Concepts/Ride-Lifecycle.md",
+        "Components/Realtime-Updates.md",
+        "Decisions/ADR-002-Server-Authority.md"
+      ],
+      "checked_facts": [
+        "Транзакційно збережений серверний стан є джерелом істини",
+        "Подія після збереження; має версію; старі відкидаються",
+        "Пропуски компенсуються API; механізм ще заплановано"
+      ],
+      "criteria": "Cover checked facts using retrieved evidence and revisions; label planned behavior; no invented implementation. Score per common rubric."
+    },
+    {
+      "id": "Q10",
+      "category": "unimplemented",
+      "question": "Чи вже реалізоване автоматичне призначення найближчого водія з безперервним GPS-відстеженням?",
+      "query": "GPS",
+      "limit": 5,
+      "expected_sources": [
+        "Components/Realtime-Updates.md",
+        "Concepts/Route.md",
+        "Components/Backend-API.md"
+      ],
+      "checked_facts": [
+        "Не стверджувати наявність автоматичного призначення чи GPS-трансляції",
+        "Постійний GPS не входить до початкового realtime-контракту",
+        "Недостатність доказів прямо зазначати"
+      ],
+      "criteria": "Cover checked facts using retrieved evidence and revisions; label planned behavior; no invented implementation. Score per common rubric."
+    }
+  ]
+}

@@ -3,7 +3,7 @@ import subprocess
 import sys
 import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from knowledge import Vault, KnowledgeError
+from knowledge import Vault, KnowledgeError, parse_note
 
 
 def git(root, *args):
@@ -27,13 +27,52 @@ def create(v, title='Ride', **kwargs):
     return v.ingest(title,'concept','# Ride\n\nA ride.','drive2u/docs/app-requirements.md',**kwargs)
 
 
+def test_frontmatter_delimiter_inside_quoted_source(setup):
+    v, _ = setup
+    text = ('---\ntype: component\ncreated: 2026-10-24\nupdated: 2026-10-24\n'
+            'status: planned\ntags: [drive2u, component]\n'
+            'source: "docs/example---reference.md"\n---\n\n# Example\n\n---\nBody.\n')
+    target = v.root / 'Components' / 'Example.md'
+    target.parent.mkdir()
+    target.write_text(text, encoding='utf-8')
+    note = v.get('Components/Example.md')
+    assert note['metadata']['source'] == 'docs/example---reference.md'
+    assert note['content'] == text
+
+
+@pytest.mark.parametrize('newline', ['\n', '\r\n'])
+@pytest.mark.parametrize('bom', ['', '\ufeff'])
+def test_parse_note_line_fences_and_encoding(newline, bom):
+    text = ('---\ntype: component\ncreated: 2026-10-24\nupdated: 2026-10-24\n'
+            'status: planned\ntags: [drive2u, component]\n'
+            'source: "docs/example---reference.md"\n'
+            'custom: |\n  embedded---value\n---\n\n# Example\n\n---\nBody---text.\n')
+    metadata, body = parse_note(bom + text.replace('\n', newline))
+    assert metadata['source'] == 'docs/example---reference.md'
+    assert metadata['custom'] == 'embedded---value\n'
+    assert body == '# Example\n\n---\nBody---text.'
+
+
+@pytest.mark.parametrize('text,error', [
+    ('', 'INVALID_FRONTMATTER'),
+    ('type: component\n---\n# Body', 'INVALID_FRONTMATTER'),
+    ('---\nsource: "has---text"\n# Missing closing fence', 'INVALID_FRONTMATTER'),
+    ('---\nsource: [unterminated\n---\n# Body', 'INVALID_YAML'),
+    ('---\ntags:\n\u00a0 - synthetic\nsource: test\n---\n# Body', 'INVALID_YAML'),
+    ('---\nsource: valid\n---\n# Body', 'MISSING_METADATA'),
+])
+def test_parse_note_preserves_explicit_errors(text, error):
+    with pytest.raises(KnowledgeError, match='^' + error + '$'):
+        parse_note(text)
+
+
 def test_create_get_search_repeat_update(setup):
     v,remote=setup
     first=create(v)
     assert first['status']=='created' and first['published']
     assert git(remote,'rev-parse','main')==first['commit']
     assert '[[Ride]]' in v.read('MOC-Drive2U.md')
-    assert v.search('ride')['total']==2
+    assert v.text_search('ride')['total']==2
     assert v.get('Concepts/Ride.md')['metadata']['type']=='concept'
     assert create(v)['status']=='unchanged'
     assert git(v.root,'rev-parse','HEAD')==first['commit']
@@ -49,6 +88,86 @@ def test_create_get_search_repeat_update(setup):
                                  'Concepts\\Ride.md','.git/config','Other/Ride.md','Concepts/a/b.md'])
 def test_reject_paths(setup,path):
     with pytest.raises(KnowledgeError):setup[0].get(path)
+
+
+@pytest.fixture
+def conventions(setup):
+    v,remote=setup
+    text=('---\ntype: convention\ncreated: 2026-10-22\nupdated: 2026-10-22\n'
+          'status: active\ntags: [drive2u, convention]\nsource: original\n'
+          'custom: keep\n---\n\n# Conventions\n\nExisting rules.\n')
+    (v.root/'Conventions.md').write_text(text,encoding='utf-8')
+    git(v.root,'add','Conventions.md');git(v.root,'commit','-m','seed conventions');git(v.root,'push')
+    return v,remote,v.get('Conventions.md')
+
+
+def update_conventions(v, **kwargs):
+    return v.ingest('Conventions','convention',
+                    '# Conventions\n\nExisting rules.\n\nTyped relation rules.',
+                    'drive2u/docs/ontology.md',status='active',**kwargs)
+
+
+def test_conventions_update_current_revision(conventions):
+    v,remote,old=conventions
+    result=update_conventions(v,expected_revision=old['revision'])
+    assert result['status']=='updated' and result['published']
+    assert result['note_id']=='Conventions.md'
+    assert git(remote,'rev-parse','main')==result['commit']
+    note=v.get('Conventions.md')
+    assert note['revision']==result['revision']!=old['revision']
+    assert note['metadata']['type']=='convention'
+    assert note['metadata']['created']==old['metadata']['created']
+    assert note['metadata']['custom']=='keep'
+    assert 'Existing rules.' in note['content'] and 'Typed relation rules.' in note['content']
+    assert not (v.root/'Components'/'Conventions.md').exists()
+    assert set(git(v.root,'diff-tree','--no-commit-id','--name-only','-r',result['commit']).splitlines()) <= {'Conventions.md','MOC-Drive2U.md'}
+
+
+def test_conventions_reject_stale_revision(conventions):
+    v,remote,old=conventions
+    first=update_conventions(v,expected_revision=old['revision'])
+    with pytest.raises(KnowledgeError,match='REVISION_CONFLICT'):
+        v.ingest('Conventions','convention','# Different rules','source',
+                 expected_revision=old['revision'])
+    assert v.get('Conventions.md')['revision']==first['revision']
+    assert git(v.root,'rev-parse','HEAD')==git(remote,'rev-parse','main')==first['commit']
+    assert not git(v.root,'status','--porcelain')
+
+
+def test_conventions_repeat_without_new_commit(conventions):
+    v,remote,old=conventions
+    first=update_conventions(v,expected_revision=old['revision'])
+    repeat=update_conventions(v,expected_revision=old['revision'])
+    assert repeat['status']=='unchanged' and repeat['published']
+    assert repeat['revision']==first['revision']
+    assert repeat['commit']==first['commit']==git(remote,'rev-parse','main')
+    assert not git(v.root,'status','--porcelain')
+
+
+@pytest.mark.parametrize('title,note_type',[
+    ('Other','convention'),('conventions','convention'),('MOC-Drive2U','moc'),
+    ('Conventions','arbitrary'),('../Conventions','convention'),
+    ('Other/Conventions','convention'),
+])
+def test_conventions_reject_other_root_or_type(conventions,title,note_type):
+    v,remote,old=conventions
+    before=git(remote,'rev-parse','main')
+    with pytest.raises(KnowledgeError,match='INVALID_TITLE_OR_TYPE'):
+        v.ingest(title,note_type,'# Unauthorized','source',expected_revision=old['revision'])
+    assert git(v.root,'rev-parse','HEAD')==git(remote,'rev-parse','main')==before
+    assert not git(v.root,'status','--porcelain')
+
+
+def test_conventions_writer_lock_and_read_only(conventions):
+    from filelock import FileLock, Timeout
+    v,_,old=conventions
+    with FileLock(str(v.gitdir/'drive2u-knowledge.lock')):
+        with pytest.raises(Timeout):
+            update_conventions(v,expected_revision=old['revision'])
+    v.write_enabled=False
+    with pytest.raises(KnowledgeError,match='WRITES_DISABLED'):
+        update_conventions(v,expected_revision=old['revision'])
+    assert v.get('Conventions.md')['revision']==old['revision']
 
 
 def test_symlink(setup,tmp_path):
@@ -152,7 +271,7 @@ def test_reads_work_while_other_process_holds_writer_lock(setup):
     with other:
         assert v.health()['writer_busy'] is True
         assert v.get('Concepts/Ride.md')['content']
-        assert v.search('Ride')['total']==2
+        assert v.text_search('Ride')['total']==2
         from filelock import Timeout
         with pytest.raises(Timeout):create(v,title='Other')
 
@@ -163,7 +282,7 @@ def test_health_and_reads_do_not_run_git(setup,monkeypatch):
     monkeypatch.setattr(v,'git',forbidden)
     assert v.health()['ok']
     assert v.get('Concepts/Ride.md')['note_id']=='Concepts/Ride.md'
-    assert v.search('Ride')['total']==2
+    assert v.text_search('Ride')['total']==2
 
 
 def test_git_does_not_wait_for_inherited_stdout(setup,monkeypatch):

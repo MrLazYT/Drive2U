@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <ProjectReference Include="../Drive2U.Fares/Drive2U.Fares.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,9 @@
+{
+  "harness/knowledge-mcp/knowledge.py": "138d51f8380956815b6fdc1bf5791a8cf312875b44fe542132236d532bc84f0a",
+  "harness/knowledge-mcp/server.py": "fc167a1fabf0e3e3df21e10cb80bc73d5197c6ffe478eaf9ed996ed9ecdfbd8e",
+  "harness/knowledge-mcp/semantic.py": "b5581d958c23c1bfb2877b428f7d84bf5eac66485ecbfc08758979aa861e7fda",
+  "harness/knowledge-mcp/build_index.py": "8db4bfe84edcbf6a192af638ada168b83aec6595642a57c2a52865d7678e80af",
+  "harness/knowledge-mcp/prepare_model.py": "da501c9fd781c16af6906e3cef2995d4dfefa1148ee43dfcedab2a4e8feed1d7",
+  "harness/knowledge-mcp/requirements.txt": "e354b82ee2168d647ef408b34d0d4653758f302dfc5d327f1d70b6f5c3cffd66",
+  "harness/knowledge-mcp/requirements-lock.txt": "b66b2d0131706476e1b8c73b5fd2d2880707fed6897851cf63a9af053cae9ce0"
+}
