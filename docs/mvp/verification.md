@@ -82,7 +82,8 @@ SQLite config); після виправлення фабрики й додава
 | `npx expo-doctor` | 20/20 checks passed |
 | `npm run export:android` | Android Hermes bundle зібрано (2 MB), Expo export успішний |
 
-Smoke повторено на фінальному API о 21:13:19 UTC; [api-smoke.json](api-smoke.json)
+Smoke повторено на фінальному API після виправлень рев’ю о 21:20:39 UTC;
+[api-smoke.json](api-smoke.json)
 містить фактичний результат. Тести xUnit охоплюють захищені API, заборону
 самопризначення водія, власника/прострочення quote, ідемпотентність,
 переходи й скасування, конкуренцію двох водіїв на SQLite, перезапуск і
@@ -100,4 +101,13 @@ legacy fare estimate та MVP validation responses; новий xUnit regression 
 увійшов до 47/47. Повторне read-only рев’ю підтвердило обидва виправлення,
 інших P1/P2 не встановило. Рев’ю не проводило Android UI запуск.
 
-Синхронізація знань документується окремо після commit підтвердженої реалізації.
+Після commit реалізації `a81e4314ece8f4ef2ae2d4f3ffa789ef8cde21e0`
+застосовано `drive2u-sync-knowledge` через MCP 1.4.0 до шести нотаток:
+Backend-API, Mobile-Application, Mapping-Integration, Realtime-Updates,
+Fare-Quote та Ride-Lifecycle. Попередні тексти й зв’язки збережено, додано
+підтверджені MVP факти, джерело коду й межі Android-перевірки. Кожний запис
+повернув `published=true`; readback збігся з повним тілом, точний повтор дав
+`unchanged`. Наступний semantic search повернув актуальні шість ревізій
+(`index_updates.changed=6`, `removed=0`). Точні ревізії, vault commits і
+результати — [knowledge-sync.json](knowledge-sync.json). Історичні baseline й
+оцінки semantic retrieval не змінювалися.

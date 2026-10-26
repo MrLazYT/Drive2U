@@ -1,0 +1,69 @@
+{
+  "source_commit": "a81e4314ece8f4ef2ae2d4f3ffa789ef8cde21e0",
+  "mcp_version": "1.4.0",
+  "notes": [
+    {
+      "note_id": "Components/Backend-API.md",
+      "before_revision": "bf39934c5ed3ae3a8d890517f3f04802a08ff1422c14335ae3efcd8c1459d586",
+      "revision": "cc9aea27777a66c7425b92e07c942e18c0a7b9bac18a31e1df97fdec7f30af54",
+      "commit": "193a66d50ce2d9aca0a89f409b817ea26a9543ad",
+      "published": true,
+      "readback_matches": true,
+      "exact_repeat": "unchanged"
+    },
+    {
+      "note_id": "Components/Mobile-Application.md",
+      "before_revision": "06a203a1d5822ba4df9ccdce5113ba03e54f00354fe7a66228ee1b12439b5128",
+      "revision": "24016a088173c6badfb1eb3c520c1676d294ce1df945c47c02277791876bcef2",
+      "commit": "a6919b595ee9fde0270d8b75e136bb443863e342",
+      "published": true,
+      "readback_matches": true,
+      "exact_repeat": "unchanged"
+    },
+    {
+      "note_id": "Components/Mapping-Integration.md",
+      "before_revision": "f110afb8302657ace6de1fc7db3f28ff55c8d91d01f57293081619c6c4d109e4",
+      "revision": "8f0c2f429c7645ac1028da62b8964a4ea641bd81847f94e4f90e70b534ebfaf3",
+      "commit": "3ba2c4f4823a6e40cec0003c39357a99418f07af",
+      "published": true,
+      "readback_matches": true,
+      "exact_repeat": "unchanged"
+    },
+    {
+      "note_id": "Components/Realtime-Updates.md",
+      "before_revision": "e0cb9c811d205f587657a347d3712350f0449dde40539f6890e6d84eb3ea57d0",
+      "revision": "abcfbc6177c083bcd5aa99b11ccebb67006842ea6d063b846d06af354e0ed76d",
+      "commit": "82d2ae6b7c1361d0b8d79531cbb4705ee6e8c4e9",
+      "published": true,
+      "readback_matches": true,
+      "exact_repeat": "unchanged"
+    },
+    {
+      "note_id": "Concepts/Fare-Quote.md",
+      "before_revision": "22050ecb45f1a83467fc2aba8d628e8f346b9a577044fda08c634de45b0523d9",
+      "revision": "ea3a248d85de90639b9ef45921f803e30116a8e72a0d50837a00d86aa3edd463",
+      "commit": "e3575bc3bf425da87797523353915dd1d5547016",
+      "published": true,
+      "readback_matches": true,
+      "exact_repeat": "unchanged"
+    },
+    {
+      "note_id": "Concepts/Ride-Lifecycle.md",
+      "before_revision": "d8bd7e877838fe69447de968b7650c358cd631d671122b5d17f8ece9078e8553",
+      "revision": "e63e5ced478a5211e50ea3104247005198b48c50ecc2a6fe315a94907d903008",
+      "commit": "c643e888f61736f488d01e2dda23bb89c4c5d225",
+      "published": true,
+      "readback_matches": true,
+      "exact_repeat": "unchanged"
+    }
+  ],
+  "semantic_readback": {
+    "mode": "semantic",
+    "index_updates": {
+      "changed": 6,
+      "removed": 0
+    },
+    "corpus_revision": "da917402a54546f3008becb56692294c97d46dd69e53679b2ccf122da621c016",
+    "all_six_revisions_current": true
+  }
+}

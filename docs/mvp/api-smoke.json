@@ -2,7 +2,7 @@
     "baseUrl":  "http://127.0.0.1:5193",
     "apiRestarted":  true,
     "databasePersistent":  true,
-    "checkedAt":  "2026-10-26T21:13:19.0920584Z",
+    "checkedAt":  "2026-10-26T21:20:39.3852358Z",
     "status":  "passed",
     "androidUiTested":  false,
     "routeMode":  "Demo",
