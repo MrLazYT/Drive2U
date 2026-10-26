@@ -144,3 +144,29 @@ MCP до vault. Прочитай knowledge-sync.json перед будь-яки�
 No restart is falsely claimed for the existing active processes. Sandbox setup
 failed before execution; necessary local commands used individually approved
 require_escalated. This permission did not authorize filesystem vault access.
+
+## Final sync preflight and saved state
+
+Implementation/evaluation committed as `be24e88ef05239f5be6d07959184a5d28d40b6a9`.
+Before commit: scoped staged diff inspected;35files, no banned artifacts, no detected
+AWS/GitHub/private-key/OpenAI-key patterns. Whitespace checked; one transcript EOF
+blank line corrected before commit. Pre-existing changes excluded.
+
+Applied drive2u-sync-knowledge after finishing comparison. MCP health1.4.0:
+write_enabled=true, writer_busy=false, pending_push=false; Conventions read.
+Target search returned explicit SEMANTIC_INDEX_BUSY. No ingest_note called.
+First orchestrator parser expected JSON on this error and failed; a second preflight
+stored the raw error correctly, then stopped. This did not modify corpus/index.
+All19 current note revisions then independently read through MCP and matched frozen
+ones (`corpus-after.json`). A read-only availability probe of the app's derived
+index lock confirmed still unavailable. No source vault filesystem access.
+
+The review agent confirmed it terminated the orchestration waiter for an old cold
+call; that did not establish backend cancellation or release. The original active
+process must exit/restart. Per skill's busy-stop rule, sync remains **unfinished**:
+no new vault revision/commit; published/readback/unchanged/post-sync index refresh
+are unverified. Raw preflight in knowledge-sync.json; exact steps/prompt in
+continuation.md. This is a saved intermediate result, not completion of the full task.
+
+Role handoffs validate against the unchanged handoff.schema.json using the target
+.venv jsonschema package; every evidence JSON parsed successfully.

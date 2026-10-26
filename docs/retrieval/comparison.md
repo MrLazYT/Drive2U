@@ -104,4 +104,6 @@ Windows startup finding/fix. [orchestration/](orchestration/) contains actual se
 Planner→Reviewer handoffs, raw semantic retrieval/readbacks and a transcript for the
 implemented fare API analysis. Existing role instructions were used unchanged; API
 code was only read. [knowledge-sync.json](knowledge-sync.json) records the subsequent
-authorized Knowledge-Connector update, outside the frozen comparison interval.
+authorized Knowledge-Connector sync preflight, stopped by an old-process busy lock.
+No vault update has occurred; published/readback/unchanged and post-sync indexing
+remain pending. [continuation.md](continuation.md) gives exact restart/continuation.

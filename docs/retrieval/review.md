@@ -47,3 +47,5 @@ Rejected a maintenance-lock symlink candidate after inspecting pinned filelock 3
 - Health does not prove model/index readiness. Corrupt/incompatible state requires explicit maintenance; no destructive automatic recovery is introduced.
 
 Subject files were not edited. Reviewer wrote only this report and `review-mcp.json`. Coordinator must attach actual suite results and finish evaluation/documentation before final acceptance.
+
+Operational follow-up: review exec cell 19 was explicitly terminated without a completed MCP response. Terminating that waiter did not prove backend cancellation: coordinator later observed `SEMANTIC_INDEX_BUSY` at sync preflight and correctly attempted no vault write. The original pre-fix MCP process must exit/restart and actual lock release must be confirmed before synchronization. No additional retrieval retries were launched.

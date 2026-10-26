@@ -1,0 +1,120 @@
+{
+  "checked_at": "2026-10-26T13:28:16.098Z",
+  "phase": "after comparison, before any sync write",
+  "notes": [
+    {
+      "note_id": "Components/Backend-API.md",
+      "revision": "bf39934c5ed3ae3a8d890517f3f04802a08ff1422c14335ae3efcd8c1459d586",
+      "head": "311d1a76802a0a75090381caff8073eeb4bffab2",
+      "matches_frozen": true
+    },
+    {
+      "note_id": "Components/Change-236eea02af6c.md",
+      "revision": "356da8bbfc0b1db91a18c6c2bd5b3e1e0c3aabd9e28b7bee64aee2f623075d0a",
+      "head": "311d1a76802a0a75090381caff8073eeb4bffab2",
+      "matches_frozen": true
+    },
+    {
+      "note_id": "Components/Change-c088c2027139.md",
+      "revision": "ca58b8f12c1608e1f6e19ab32514d8ffa09690dbe4a39421ff2b02a51e1a5ccc",
+      "head": "311d1a76802a0a75090381caff8073eeb4bffab2",
+      "matches_frozen": true
+    },
+    {
+      "note_id": "Components/Guardrails-Policy.md",
+      "revision": "0d3450a5d2a63f519c8f2fe55369d7f72e5a2fd1c54030cbf02142f04e1062cb",
+      "head": "311d1a76802a0a75090381caff8073eeb4bffab2",
+      "matches_frozen": true
+    },
+    {
+      "note_id": "Components/Knowledge-Connector.md",
+      "revision": "eb6effe3c7482968bbb1f109d863e981d927bc374a36b98839bfcbfdea58c7ff",
+      "head": "311d1a76802a0a75090381caff8073eeb4bffab2",
+      "matches_frozen": true
+    },
+    {
+      "note_id": "Components/Mapping-Integration.md",
+      "revision": "f110afb8302657ace6de1fc7db3f28ff55c8d91d01f57293081619c6c4d109e4",
+      "head": "311d1a76802a0a75090381caff8073eeb4bffab2",
+      "matches_frozen": true
+    },
+    {
+      "note_id": "Components/Mobile-Application.md",
+      "revision": "06a203a1d5822ba4df9ccdce5113ba03e54f00354fe7a66228ee1b12439b5128",
+      "head": "311d1a76802a0a75090381caff8073eeb4bffab2",
+      "matches_frozen": true
+    },
+    {
+      "note_id": "Components/Realtime-Updates.md",
+      "revision": "e0cb9c811d205f587657a347d3712350f0449dde40539f6890e6d84eb3ea57d0",
+      "head": "311d1a76802a0a75090381caff8073eeb4bffab2",
+      "matches_frozen": true
+    },
+    {
+      "note_id": "Concepts/Driver.md",
+      "revision": "1692a4011d63019206b703e279e050345567035e0e772ff3c3adb3267e64ecd6",
+      "head": "311d1a76802a0a75090381caff8073eeb4bffab2",
+      "matches_frozen": true
+    },
+    {
+      "note_id": "Concepts/Fare-Quote.md",
+      "revision": "22050ecb45f1a83467fc2aba8d628e8f346b9a577044fda08c634de45b0523d9",
+      "head": "311d1a76802a0a75090381caff8073eeb4bffab2",
+      "matches_frozen": true
+    },
+    {
+      "note_id": "Concepts/Passenger.md",
+      "revision": "c9875ba837e41b33c50084ecdcad16155ac81bcb0be6e84c0071dc7d5e403bcf",
+      "head": "311d1a76802a0a75090381caff8073eeb4bffab2",
+      "matches_frozen": true
+    },
+    {
+      "note_id": "Concepts/Ride-Lifecycle.md",
+      "revision": "d8bd7e877838fe69447de968b7650c358cd631d671122b5d17f8ece9078e8553",
+      "head": "311d1a76802a0a75090381caff8073eeb4bffab2",
+      "matches_frozen": true
+    },
+    {
+      "note_id": "Concepts/Ride.md",
+      "revision": "2bdeaab241a2f163012a57194878e5ce14b505d3a067c9e5f7c9df93a55da962",
+      "head": "311d1a76802a0a75090381caff8073eeb4bffab2",
+      "matches_frozen": true
+    },
+    {
+      "note_id": "Concepts/Route.md",
+      "revision": "a2cdcb6bdcbf7734de453e95079dd0f8fcca21232d97e99b1343de2f8cb67978",
+      "head": "311d1a76802a0a75090381caff8073eeb4bffab2",
+      "matches_frozen": true
+    },
+    {
+      "note_id": "Conventions.md",
+      "revision": "a1c673177135b4f29f7bf92f397e28da7a639633ed8d761d4fce418ea435da6d",
+      "head": "311d1a76802a0a75090381caff8073eeb4bffab2",
+      "matches_frozen": true
+    },
+    {
+      "note_id": "Decisions/ADR-001-Technology-Stack.md",
+      "revision": "712a3ee5dbe6812271dadcf2f9cb2067244cf4a1aa0fd0ef194b9e13fa168b50",
+      "head": "311d1a76802a0a75090381caff8073eeb4bffab2",
+      "matches_frozen": true
+    },
+    {
+      "note_id": "Decisions/ADR-002-Server-Authority.md",
+      "revision": "e387b603c579096ae4fabafd62104ab605602debd40cdadeb552bb107fd5e55d",
+      "head": "311d1a76802a0a75090381caff8073eeb4bffab2",
+      "matches_frozen": true
+    },
+    {
+      "note_id": "Glossary/Project-Glossary.md",
+      "revision": "afc7e88ffc9ce10b05eb2b44d4b70fcc3cb00ece4da4af3476b9fca2b4211d40",
+      "head": "311d1a76802a0a75090381caff8073eeb4bffab2",
+      "matches_frozen": true
+    },
+    {
+      "note_id": "MOC-Drive2U.md",
+      "revision": "42bf9b49e03fd1388852ecf5bd630d099a402a814bbbc63cc7ff31048342aa80",
+      "head": "311d1a76802a0a75090381caff8073eeb4bffab2",
+      "matches_frozen": true
+    }
+  ]
+}
