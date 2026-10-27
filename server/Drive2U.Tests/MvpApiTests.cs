@@ -34,6 +34,7 @@ public sealed class MvpFactory : WebApplicationFactory<Program>
             ["Mvp:QuoteLifetimeSeconds"] = quoteSeconds.ToString(),
             ["Routing:DefaultMode"] = "Demo",
             ["Routing:AllowDemo"] = "true",
+            ["Routing:OsrmBaseUrl"] = "",
             ["FareTariff:BaseFare"] = "50",
             ["FareTariff:RatePerKm"] = "42"
         }));
@@ -53,6 +54,25 @@ public sealed class MvpFactory : WebApplicationFactory<Program>
 
 public sealed class MvpApiTests
 {
+    [Fact]
+    public async Task DevelopmentApiAcceptsAndroidEmulatorHost()
+    {
+        await using var factory = new MvpFactory();
+        using var client = Client(factory, await Login(factory));
+        using var request = new HttpRequestMessage(HttpMethod.Get, "/health");
+        request.Headers.Host = "10.0.2.2:5187";
+        using var response = await client.SendAsync(request);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        using var quoteRequest = new HttpRequestMessage(HttpMethod.Post, "/api/quotes")
+        {
+            Content = JsonContent.Create(new { pickup = Start, destination = End, routingMode = "Demo" })
+        };
+        quoteRequest.Headers.Host = "10.0.2.2:5187";
+        using var quoteResponse = await client.SendAsync(quoteRequest);
+        using var quote = await Json(quoteResponse);
+        Assert.Equal(184.40m, quote.RootElement.GetProperty("amount").GetDecimal());
+    }
+
     private static readonly object Start = new { latitude = 49.84085, longitude = 23.99436, address = "Вокзал", locationId = "station" };
     private static readonly object End = new { latitude = 49.84405, longitude = 24.02626, address = "Опера", locationId = "opera" };
     private static HttpClient Client(MvpFactory factory, string? token = null)

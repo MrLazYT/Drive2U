@@ -9,6 +9,8 @@ import {clearSession,loadSession,saveSession} from './src/session';
 import {canCancel,money,nextStatus,statusText,terminal} from './src/domain';
 import {Button,Card,colors,Field,Notice,styles} from './src/ui';
 import {RideMap} from './src/RideMap';
+import {PassengerHome} from './src/PassengerHome';
+import {clearRecent} from './src/recent';
 import type {History,Location,Point,Quote,Ride,RoutingMode,Session} from './src/types';
 
 type Tab='home'|'history'|'profile';
@@ -80,12 +82,26 @@ function AppContent(){
    </Card>}
   </>;
  }
+ if(user.role==='Passenger'&&tab==='home'&&!active&&!detail)return <PassengerHome api={api} userId={user.id} onProfile={()=>setTab('profile')} onOrdered={()=>refresh(true)}/>;
+ if(user.role==='Passenger'&&tab==='home'&&active&&!detail)return <View style={{flex:1}}>
+  <RideMap fullScreen pickup={active.pickup} destination={active.destination} route={active.route} locations={[]}/>
+  <View style={{position:'absolute',top:16,left:16,right:16,flexDirection:'row',justifyContent:'space-between',alignItems:'center'}}><Text style={{fontSize:26,fontWeight:'900',color:colors.green}}>Drive2U↗</Text><Button secondary title="Профіль" onPress={()=>setTab('profile')}/></View>
+  <View style={{position:'absolute',bottom:0,left:0,right:0,backgroundColor:'#fff',borderTopLeftRadius:24,borderTopRightRadius:24,padding:20,gap:8}}>
+   <Text style={styles.title}>{statusText[active.status]}</Text><Text style={styles.price}>{money(active.amount)}</Text>
+   <Text style={styles.text}>{active.pickup.address} → {active.destination.address}</Text>
+   <Text style={styles.muted}>{active.route.distanceKm.toFixed(2)} км · ≈ {Math.ceil(active.route.durationSeconds/60)} хв · Готівка</Text>
+   {active.driver&&<Text style={styles.text}>Водій: {active.driver.name}{active.driver.vehicle?` · ${active.driver.vehicle.make} ${active.driver.vehicle.model} · ${active.driver.vehicle.plate}`:''}</Text>}
+   {!!error&&<Notice text={error} error/>}
+   {canCancel(active,user)&&<Button danger title="Скасувати поїздку" disabled={working} onPress={()=>Alert.alert('Скасувати поїздку?','Цю дію неможливо скасувати.',[{text:'Залишити',style:'cancel'},{text:'Скасувати',style:'destructive',onPress:()=>void action(async()=>{await api.cancel(active.id,'Пасажир скасував замовлення');await refresh(true);})}])}/>}
+  </View>
+ </View>;
  return <View style={styles.screen}><View style={{paddingHorizontal:20,paddingVertical:12,flexDirection:'row',justifyContent:'space-between',alignItems:'center'}}><Text style={{fontSize:26,fontWeight:'900',color:colors.green}}>Drive2U↗</Text><Text style={styles.muted}>{user.role==='Driver'?'Водій':'Пасажир'} · Львів</Text></View>
  <KeyboardAvoidingView style={{flex:1}} behavior={Platform.OS==='ios'?'padding':'height'}><ScrollView keyboardShouldPersistTaps="handled" refreshControl={<RefreshControl refreshing={refreshing} onRefresh={()=>void refresh(true)} tintColor={colors.green}/>} contentContainerStyle={styles.content}>
   {offline&&<Notice error text="Немає підтвердженого зв’язку. Показано останній збережений стан; потягніть вниз для оновлення."/>}{error&&<Notice text={error} error/>}
   <Text style={styles.muted}>{realtime?'● Оновлення наживо':'◌ Резервне оновлення кожні 8 с'}</Text>
   {detail?<><Button secondary title="← Назад" onPress={dismissDetail}/>{renderRideCard(detail,false)}</>:tab==='profile'?<>
    <Text style={styles.heading}>Ваш профіль</Text><Card><Text style={styles.title}>{user.name}</Text><Text style={styles.text}>{user.email}</Text><Text style={styles.muted}>{user.role==='Driver'?'Допущений водій':'Пасажир'}</Text>{user.driverProfile&&<>{user.driverProfile.vehicle&&<><Text style={styles.text}>{user.driverProfile.vehicle.make} {user.driverProfile.vehicle.model}</Text><Text style={styles.title}>{user.driverProfile.vehicle.plate}</Text></>}<Notice text={user.driverProfile.approved?'Профіль водія допущений':'Профіль очікує допуску'}/></>}<Text style={styles.muted}>Сесія до {new Date(session.expiresAt).toLocaleString('uk-UA')}</Text></Card>
+   {user.role==='Passenger'&&<><Button secondary title="Історія поїздок" onPress={()=>setTab('history')}/><Button secondary title="Очистити нещодавні адреси" onPress={()=>action(async()=>{await clearRecent(user.id);})}/></>}
    <Button danger title="Вийти з облікового запису" disabled={working} onPress={()=>action(async()=>{await api.logout();await clearSession();invalidate();})}/><Text style={styles.muted}>Поїздка збережена на сервері й залишиться після повторного входу. Для зміни ролі увійдіть іншим обліковим записом.</Text>
   </>:tab==='history'?<>
    <Text style={styles.heading}>Історія поїздок</Text>{history.items.length===0?<Card><Text style={styles.title}>Ще немає завершених поїздок</Text><Text style={styles.muted}>Ваші завершені та скасовані поїздки з’являться тут.</Text></Card>:history.items.map(ride=><Card key={ride.id}><Text style={styles.title}>{statusText[ride.status]} · {money(ride.amount)}</Text><Text style={styles.muted}>{ride.pickup.address} → {ride.destination.address}</Text><Text style={styles.muted}>{new Date(ride.createdAt).toLocaleString('uk-UA')}</Text><Button secondary title="Деталі поїздки" onPress={()=>action(async()=>openDetail(await api.ride(ride.id)))}/></Card>)}
@@ -106,7 +122,7 @@ function AppContent(){
    {quote&&<Card><Text style={styles.title}>Ваша пропозиція</Text><Text style={styles.price}>{money(quote.amount)}</Text><Text style={styles.text}>{quote.route.distanceKm.toFixed(2)} км · ≈ {Math.ceil(quote.route.durationSeconds/60)} хв</Text><Text style={styles.muted}>Готівка — демонстрація · {remaining>0?`Чинна ще ${remaining} с`:'Строк дії закінчився — перерахуйте'}</Text><Button title="Підтвердити замовлення" disabled={working||remaining===0||offline} onPress={()=>action(async()=>{await api.confirm(quote.id,confirmationKey.current);setQuote(null);await refresh(true);})}/></Card>}
   </>}
  </ScrollView></KeyboardAvoidingView>
- <View style={{flexDirection:'row',paddingHorizontal:16,paddingTop:10,paddingBottom:8,gap:8,borderTopWidth:1,borderColor:colors.border,backgroundColor:'#fff'}}>{([{id:'home',label:user.role==='Driver'?'Замовлення':'Поїздка'},{id:'history',label:'Історія'},{id:'profile',label:'Профіль'}] as const).map(item=><View key={item.id} style={{flex:1}}><Button title={item.label} secondary={tab!==item.id} onPress={()=>{dismissDetail();setTab(item.id);setError('');}}/></View>)}</View>
+ <View style={{flexDirection:'row',paddingHorizontal:16,paddingTop:10,paddingBottom:8,gap:8,borderTopWidth:1,borderColor:colors.border,backgroundColor:'#fff'}}>{(user.role==='Driver'?([{id:'home',label:'Замовлення'},{id:'history',label:'Історія'},{id:'profile',label:'Профіль'}] as const):([{id:'home',label:'Мапа'},{id:'profile',label:'Профіль'}] as const)).map(item=><View key={item.id} style={{flex:1}}><Button title={item.label} secondary={tab!==item.id} onPress={()=>{dismissDetail();setTab(item.id);setError('');}}/></View>)}</View>
  </View>;
 }
 export default function App(){return <SafeAreaProvider><SafeAreaView style={styles.screen}><StatusBar style="dark"/><AppContent/></SafeAreaView></SafeAreaProvider>;}

@@ -6,6 +6,8 @@ namespace Drive2U.Api.Mvp;
 
 public sealed class RoutingService(HttpClient client, IConfiguration config)
 {
+    private static readonly SemaphoreSlim PublicRouterGate = new(1,1);
+    private static DateTime LastPublicRequest = DateTime.MinValue;
     public static readonly Location[] Locations = [
         new("station", "Головний залізничний вокзал", 49.84085, 23.99436),
         new("opera", "Львівська опера", 49.84405, 24.02626),
@@ -46,6 +48,17 @@ public sealed class RoutingService(HttpClient client, IConfiguration config)
         var coordinates=FormattableString.Invariant($"{pickup.Longitude},{pickup.Latitude};{destination.Longitude},{destination.Latitude}");
         try
         {
+            if(root.Host.Equals("routing.openstreetmap.de",StringComparison.OrdinalIgnoreCase))
+            {
+                await PublicRouterGate.WaitAsync(ct);
+                try
+                {
+                    var pause=LastPublicRequest.AddSeconds(1)-DateTime.UtcNow;
+                    if(pause>TimeSpan.Zero)await Task.Delay(pause,ct);
+                    LastPublicRequest=DateTime.UtcNow;
+                }
+                finally { PublicRouterGate.Release(); }
+            }
             using var response=await client.GetAsync(new Uri(root.ToString().TrimEnd('/')+"/route/v1/driving/"+coordinates+"?overview=full&geometries=geojson"),ct);
             if (!response.IsSuccessStatusCode) throw new HttpRequestException();
             using var document=JsonDocument.Parse(await response.Content.ReadAsStringAsync(ct));

@@ -11,6 +11,7 @@ type Props = {
   route?: Route|null;
   locations: Location[];
   onPick?: (coordinate:Coordinate)=>void;
+  fullScreen?: boolean;
 };
 
 const tiles='https://tile.openstreetmap.org/{z}/{x}/{y}.png';
@@ -18,7 +19,7 @@ function htmlFor(props:Props):string {
   const data = JSON.stringify({
     pickup:props.pickup,destination:props.destination,
     geometry:props.route?.geometry??[],locations:props.locations,
-    interactive:!!props.onPick,
+    interactive:!!props.onPick,panel:!!props.fullScreen&&!props.onPick,
   }).replace(/</g,'\\u003c').replace(/>/g,'\\u003e').replace(/&/g,'\\u0026');
   return `<!DOCTYPE html><html lang="uk"><head><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/><style>${leafletCss}
     html,body,#map{margin:0;width:100%;height:100%;background:#ecf2e7}
@@ -44,8 +45,8 @@ function htmlFor(props:Props):string {
         const points=data.geometry.map(p=>[p.latitude,p.longitude]);
         L.polyline(points,{color:'#ffffff',weight:11,opacity:.9}).addTo(map);
         L.polyline(points,{color:'#147d64',weight:7,opacity:.95}).addTo(map);
-        map.fitBounds(L.latLngBounds(points),{padding:[30,30],maxZoom:15});
-      }else if(data.pickup&&data.destination){map.fitBounds([[data.pickup.latitude,data.pickup.longitude],[data.destination.latitude,data.destination.longitude]],{padding:[35,35],maxZoom:15});}
+        map.fitBounds(L.latLngBounds(points),data.panel?{paddingTopLeft:[24,235],paddingBottomRight:[24,235],maxZoom:15}:{padding:[30,30],maxZoom:15});
+      }else if(data.pickup&&data.destination){map.fitBounds([[data.pickup.latitude,data.pickup.longitude],[data.destination.latitude,data.destination.longitude]],data.panel?{paddingTopLeft:[24,235],paddingBottomRight:[24,235],maxZoom:15}:{padding:[35,35],maxZoom:15});}
       else if(data.pickup||data.destination){const p=data.pickup||data.destination;map.setView([p.latitude,p.longitude],14);}
       if(data.interactive)map.on('click',event=>window.ReactNativeWebView?.postMessage(JSON.stringify({type:'pick',latitude:event.latlng.lat,longitude:event.latlng.lng})));
     })();
@@ -57,8 +58,8 @@ export function RideMap(props:Props){
   // The parent recreates onPick as state changes; its presence is enough to
   // configure map interactivity. Keep the WebView HTML stable during a timer tick.
   const html=useMemo(()=>htmlFor(props),[props.pickup,props.destination,props.route,props.locations,Boolean(props.onPick)]);
-  return <View style={{gap:6}}>
-    <View style={{height:290,borderRadius:18,overflow:'hidden',borderWidth:1,borderColor:colors.border,backgroundColor:'#ecf2e7'}}>
+  return <View style={props.fullScreen?{flex:1}:{gap:6}}>
+    <View style={props.fullScreen?{flex:1,backgroundColor:'#ecf2e7'}:{height:290,borderRadius:18,overflow:'hidden',borderWidth:1,borderColor:colors.border,backgroundColor:'#ecf2e7'}}>
       <WebView originWhitelist={['*']} source={{html,baseUrl:'about:blank'}}
         userAgent="Drive2U/1.0 (+https://github.com/MrLazYT/Drive2U)"
         javaScriptEnabled domStorageEnabled={false} scrollEnabled={false}
@@ -79,7 +80,7 @@ export function RideMap(props:Props){
           }catch{/* Ignore malformed WebView messages. */}
         }}/>
     </View>
-    {tilesError&&<Text style={styles.muted}>Мапа зараз недоступна. Перевірте інтернет і відкрийте екран ще раз. Місця зі списку залишаються доступними.</Text>}
-    <Text style={styles.muted}>{props.onPick?'Натисніть на мапу, щоб вибрати точку. ':''}{props.route?.attribution??'© OpenStreetMap contributors'}</Text>
+    {tilesError&&<Text style={styles.muted}>Мапа зараз недоступна. Перевірте інтернет.</Text>}
+    {!props.fullScreen&&<Text style={styles.muted}>{props.onPick?'Натисніть на мапу, щоб вибрати точку. ':''}{props.route?.attribution??'© OpenStreetMap contributors'}</Text>}
   </View>;
 }
