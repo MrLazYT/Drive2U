@@ -33,3 +33,17 @@ test('full OSM map shows server geometry and accepts taps beyond Lviv',async()=>
   await fireEvent(map,'onMessage',{nativeEvent:{data:JSON.stringify({type:'tiles-error'})}});
   expect(ui.getByText(/Мапа зараз недоступна/)).toBeTruthy();
 });
+test('full-screen route keeps gesture controls and fits around measured panels',async()=>{
+  const pickup={latitude:49.84085,longitude:23.99436,address:'Вокзал'};
+  const destination={latitude:49.84405,longitude:24.02626,address:'Опера'};
+  const route={distanceKm:3.2,durationSeconds:660,isDemo:false,attribution:'OSRM',geometry:[pickup,destination]};
+  const ui=await render(<RideMap fullScreen pickup={pickup} destination={destination} route={route} locations={[]} insets={{top:142,bottom:164}}/>);
+  const html=ui.getByTestId('map').props.source.html as string;
+  expect(html).toContain('zoomControl:false');
+  expect(html).toContain('touchZoom:true,dragging:true');
+  expect(html).toContain('"top":142,"bottom":164');
+  expect(html).toContain('Math.floor(viewportHeight*0.42)');
+  expect(html).toContain('paddingTopLeft');
+  expect(html).toContain('paddingBottomRight');
+  expect(html).toContain('map.fitBounds(L.latLngBounds(points),fitOptions)');
+});
