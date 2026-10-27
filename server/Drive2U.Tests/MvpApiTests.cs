@@ -34,8 +34,8 @@ public sealed class MvpFactory : WebApplicationFactory<Program>
             ["Mvp:QuoteLifetimeSeconds"] = quoteSeconds.ToString(),
             ["Routing:DefaultMode"] = "Demo",
             ["Routing:AllowDemo"] = "true",
-            ["FareTariff:BaseFare"] = "40",
-            ["FareTariff:RatePerKm"] = "12"
+            ["FareTariff:BaseFare"] = "50",
+            ["FareTariff:RatePerKm"] = "42"
         }));
     }
     public async Task AddSecondDriver()
@@ -79,7 +79,8 @@ public sealed class MvpApiTests
         using var response = await client.PostAsJsonAsync("/api/quotes", new { pickup = pickup ?? Start, destination = destination ?? End, routingMode = "Demo" });
         using var json = await Json(response);
         Assert.True(json.RootElement.GetProperty("route").GetProperty("isDemo").GetBoolean());
-        Assert.Equal(78.4m, json.RootElement.GetProperty("amount").GetDecimal());
+        Assert.Equal(3.2m, json.RootElement.GetProperty("route").GetProperty("distanceKm").GetDecimal());
+        Assert.Equal(184.40m, json.RootElement.GetProperty("amount").GetDecimal());
         Assert.True(json.RootElement.GetProperty("route").GetProperty("geometry").GetArrayLength() > 2);
         return json.RootElement.GetProperty("id").GetString()!;
     }
@@ -240,6 +241,12 @@ public sealed class MvpApiTests
             await Json(await driver.PutAsJsonAsync("/api/driver/availability", new { available = true }));
             await Json(await driver.PostAsJsonAsync($"/api/rides/{id}/accept", new { }));
             foreach (var status in new[] { "Arrived", "InProgress", "Completed" }) Assert.Equal(HttpStatusCode.OK, await Status(driver, id, status));
+            using (var scope = factory.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                db.Tariffs.Add(new TariffVersion { BaseFare = 99m, RatePerKm = 99m, EffectiveAt = DateTime.UtcNow });
+                await db.SaveChangesAsync();
+            }
             Assert.Equal(HttpStatusCode.NoContent, (await passenger.PostAsync("/api/auth/logout", null)).StatusCode);
             Assert.Equal(HttpStatusCode.Unauthorized, (await passenger.GetAsync("/api/me")).StatusCode);
         }
@@ -252,6 +259,7 @@ public sealed class MvpApiTests
                 using var client = Client(restarted, await Login(restarted, email));
                 using var json = await Json(await client.GetAsync("/api/rides/history"));
                 Assert.Equal(id, json.RootElement.GetProperty("items")[0].GetProperty("id").GetString());
+                Assert.Equal(184.40m, json.RootElement.GetProperty("items")[0].GetProperty("amount").GetDecimal());
             }
         }
     }
@@ -261,7 +269,9 @@ public sealed class MvpApiTests
     {
         await using var factory = new MvpFactory();
         using var passenger = Client(factory, await Login(factory));
-        using var response = await passenger.PostAsJsonAsync("/api/quotes", new { pickup = Start, destination = End, routingMode = "Live" });
+        using var response = await passenger.PostAsJsonAsync("/api/quotes", new {
+            pickup = new { latitude = 50.45, longitude = 30.52, address = "Київ" },
+            destination = End, routingMode = "Live" });
         Assert.Equal(HttpStatusCode.ServiceUnavailable, response.StatusCode);
     }
 

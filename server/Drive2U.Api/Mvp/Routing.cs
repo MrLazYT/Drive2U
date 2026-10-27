@@ -17,9 +17,9 @@ public sealed class RoutingService(HttpClient client, IConfiguration config)
     private static readonly Coordinate[] OperaUniversity = [new(49.84405,24.02626),new(49.84310,24.02590),new(49.84188,24.02530),new(49.84061,24.02434),new(49.84032,24.02214)];
     public static void Validate(Point point)
     {
-        if (!double.IsFinite(point.Latitude) || !double.IsFinite(point.Longitude) || point.Latitude is < 49.75 or > 49.92 || point.Longitude is < 23.85 or > 24.15 ||
+        if (!double.IsFinite(point.Latitude) || !double.IsFinite(point.Longitude) || point.Latitude is < -90 or > 90 || point.Longitude is < -180 or > 180 ||
             string.IsNullOrWhiteSpace(point.Address) || point.Address.Length > 200)
-            throw new ApiError(400, "INVALID_POINT", "Виберіть точки в межах Львова й вкажіть коротку назву.");
+            throw new ApiError(400, "INVALID_POINT", "Виберіть коректні точки й вкажіть коротку назву.");
     }
     public static Location? Known(Point p) => Locations.FirstOrDefault(x => Math.Abs(x.Latitude-p.Latitude)<0.00015 && Math.Abs(x.Longitude-p.Longitude)<0.00015);
     public async Task<RouteData> Get(Point pickup, Point destination, string mode, CancellationToken ct)

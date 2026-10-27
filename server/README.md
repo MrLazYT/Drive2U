@@ -23,11 +23,17 @@ The synthetic Development accounts are `passenger@drive2u.test` and `driver@driv
 
 The API uses local HTTP only in Development. Use `http://10.0.2.2:5187` from an Android emulator and `http://<computer LAN IPv4>:5187` from a phone on the same network. Production MVP endpoints require HTTPS.
 
-## Route modes
+## Map and routes
 
-The default mode is `Demo`: predefined road geometries between listed Lviv places, explicitly marked as demo data. `GET /api/locations` lists supported locations; arbitrary map taps require live routing. Set `Routing__DefaultMode=Live` and configure `Routing__OsrmBaseUrl` to a suitable route provider to use live routing. The server makes that request with an eight second timeout and returns a service unavailable error if routing fails. It never silently replaces a live failure with demo data. Public route or map services are not treated as unlimited production infrastructure.
+The Android Expo client uses bundled Leaflet in `react-native-webview` with online OpenStreetMap standard tiles. No map API key is required. The map can pan and zoom beyond Lviv, displays both selected markers and fits returned route geometry. Tile attribution is visible on the map. It needs internet access; the app reports tile errors and still offers the known-place list. OSM's public tiles are a best-effort service: use the exact HTTPS URL, identify the app with its User-Agent, honor normal WebView caching, do not bulk download or offer offline maps. Review the [OSM tile policy](https://operations.osmfoundation.org/policies/tiles/) before broader deployment.
 
-Quotes use the existing decimal fare calculator: `BaseFare + DistanceKm × RatePerKm`, rounded once to two places AwayFromZero. The default example tariff is 40 UAH base plus 12 UAH/km. A quote stores the route, tariff and price; only its passenger can confirm it while valid. Repeating confirmation returns the same ride. The client cannot submit a payable distance or price.
+The passenger interface tries server OSRM routing for arbitrary selected points. Set `Routing__OsrmBaseUrl` to your own or a contracted OSRM-compatible HTTPS service to enable it; `Routing__Attribution` can identify the routing data provider. With no configured router or no route, the app shows no price and offers the explicit station → opera demo fixture. The map provider and road router are separate services. No real ride dispatch or payment is performed.
+
+The API retains both `Demo` and `Live` modes. `Demo` contains predefined synthetic geometries between listed Lviv places; `GET /api/locations` lists them. Arbitrary map taps require `Routing__OsrmBaseUrl` to point to a suitable route provider. The client requests `Live` internally and offers a separate explicit demo fixture if it fails. The server makes the live request with an eight second timeout and never silently substitutes demo data. Public route or map services are not treated as unlimited production infrastructure.
+
+Quotes use the existing decimal fare calculator: `BaseFare + DistanceKm × RatePerKm`, rounded once to two places AwayFromZero. The new demo tariff is 50 UAH base plus 42 UAH/km. For the fixed station → opera fixture (3.2 km), the server returns 184.40 UAH. This is a test tariff, not a current fare of any carrier. A quote stores the route, tariff and price; only its passenger can confirm it while valid. Repeating confirmation returns the same ride. The client cannot submit a payable distance or price.
+
+On an existing Development SQLite database, repeated seed does not replace the stored tariff. Stop the API, back up `server/Drive2U.Api/App_Data/drive2u.db`, then run `python server/scripts/update-demo-tariff.py` from the repository root (or pass a custom database path). The script appends a tariff version and is safe to run twice. Restart the API. Existing quotes and rides retain their original amount and tariff snapshot; new quotes use the latest tariff. It does not delete users or history.
 
 ## API and tests
 

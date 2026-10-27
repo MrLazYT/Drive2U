@@ -1,7 +1,7 @@
 ﻿import React from 'react';
 import {cleanup, fireEvent, render, waitFor} from '@testing-library/react-native';
 import App from '../App';
-import {Api} from '../src/api';
+import {Api,ApiError} from '../src/api';
 
 jest.mock('expo-secure-store',()=>({
   WHEN_UNLOCKED_THIS_DEVICE_ONLY:1,
@@ -35,7 +35,7 @@ const route={distanceKm:3.2,durationSeconds:660,geometry:[{latitude:49.84085,lon
   {latitude:49.83948,longitude:23.99718},{latitude:49.84405,longitude:24.02626}],isDemo:true,
   attribution:'Drive2U — демонстраційний маршрут'};
 const quote={id:'q1',pickup:{...places[0],address:places[0].name,locationId:places[0].id},
-  destination:{...places[1],address:places[1].name,locationId:places[1].id},route,amount:78.4,currency:'UAH' as const,
+  destination:{...places[1],address:places[1].name,locationId:places[1].id},route,amount:184.4,currency:'UAH' as const,
   expiresAt:new Date(Date.now()+180000).toISOString()};
 
 beforeEach(()=>{
@@ -64,8 +64,8 @@ test('passenger signs in, selects two known places and requests server quote',as
   await fireEvent.press(ui.getByRole('button',{name:'Львівська опера'}));
   await fireEvent.press(ui.getByRole('button',{name:'Розрахувати маршрут і ціну'}));
   await waitFor(()=>expect(Api.prototype.quote).toHaveBeenCalledWith(
-    expect.objectContaining({locationId:'station'}),expect.objectContaining({locationId:'opera'}),'Demo'));
-  expect(ui.getByText('78.40 ₴')).toBeTruthy();
+    expect.objectContaining({locationId:'station'}),expect.objectContaining({locationId:'opera'}),'Live'));
+  expect(ui.getByText('184.40 ₴')).toBeTruthy();
   expect(ui.getAllByText(/Готівка — демонстрація/).length).toBeGreaterThan(0);
 });
 
@@ -78,4 +78,20 @@ test('backend errors are presented as readable messages without stack traces',as
   await fireEvent.press(ui.getByRole('button',{name:'Увійти'}));
   await waitFor(()=>expect(ui.getByText('Немає зв’язку із сервером. Перевірте мережу та спробуйте ще раз.')).toBeTruthy());
   expect(ui.queryByText(/network failed with stack/)).toBeNull();
+});
+
+test('unavailable road route shows no price and offers an explicit demo fixture',async()=>{
+  const request=jest.spyOn(Api.prototype,'quote');
+  request.mockRejectedValueOnce(new ApiError(503,'Маршрутизація недоступна')).mockResolvedValueOnce(quote);
+  const ui=await render(<App/>);
+  await signIn(ui);
+  await fireEvent.press(ui.getByRole('button',{name:'Головний залізничний вокзал'}));
+  await fireEvent.press(ui.getByRole('button',{name:'Львівська опера'}));
+  await fireEvent.press(ui.getByRole('button',{name:'Розрахувати маршрут і ціну'}));
+  await waitFor(()=>expect(ui.getByText(/Ціну не розраховано/)).toBeTruthy());
+  expect(ui.queryByText('184.40 ₴')).toBeNull();
+  await fireEvent.press(ui.getByRole('button',{name:'Використати маршрут вокзал → Оперний'}));
+  await waitFor(()=>expect(request).toHaveBeenLastCalledWith(
+    expect.objectContaining({locationId:'station'}),expect.objectContaining({locationId:'opera'}),'Demo'));
+  expect(ui.getByText('184.40 ₴')).toBeTruthy();
 });

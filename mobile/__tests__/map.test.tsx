@@ -8,7 +8,7 @@ jest.mock('react-native-webview',()=>{
   return {WebView:(props:unknown)=>React.createElement(View,{testID:'map',...(props as object)})};
 });
 
-test('bundled map shows server geometry and accepts a valid Lviv tap',async()=>{
+test('full OSM map shows server geometry and accepts taps beyond Lviv',async()=>{
   const onPick=jest.fn();
   const pickup={latitude:49.84085,longitude:23.99436,address:'Вокзал'};
   const destination={latitude:49.84405,longitude:24.02626,address:'Опера'};
@@ -20,9 +20,16 @@ test('bundled map shows server geometry and accepts a valid Lviv tap',async()=>{
   expect(map.props.source.html).toContain('Leaflet 1.9.4');
   expect(map.props.source.html).toContain('49.83948');
   expect(ui.getByText(/Демомаршрут/)).toBeTruthy();
-  expect(map.props.source.html).not.toContain('tile.openstreetmap.org');
+  expect(map.props.source.html).toContain('https://tile.openstreetmap.org/{z}/{x}/{y}.png');
+  expect(map.props.source.html).toContain('OpenStreetMap contributors');
+  expect(map.props.source.html).toContain('map.fitBounds');
+  expect(map.props.userAgent).toContain('Drive2U/1.0');
   await fireEvent(map,'onMessage',{nativeEvent:{data:JSON.stringify({type:'pick',latitude:49.84,longitude:24.02})}});
   expect(onPick).toHaveBeenCalledWith({latitude:49.84,longitude:24.02});
-  await fireEvent(map,'onMessage',{nativeEvent:{data:JSON.stringify({type:'pick',latitude:0,longitude:0})}});
-  expect(onPick).toHaveBeenCalledTimes(1);
+  await fireEvent(map,'onMessage',{nativeEvent:{data:JSON.stringify({type:'pick',latitude:50.45,longitude:30.52})}});
+  expect(onPick).toHaveBeenCalledWith({latitude:50.45,longitude:30.52});
+  await fireEvent(map,'onMessage',{nativeEvent:{data:JSON.stringify({type:'pick',latitude:91,longitude:0})}});
+  expect(onPick).toHaveBeenCalledTimes(2);
+  await fireEvent(map,'onMessage',{nativeEvent:{data:JSON.stringify({type:'tiles-error'})}});
+  expect(ui.getByText(/Мапа зараз недоступна/)).toBeTruthy();
 });

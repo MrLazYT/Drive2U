@@ -5,6 +5,10 @@ namespace Drive2U.Tests;
 public sealed class FareCalculatorTests
 {
     [Fact]
+    public void StationToOperaDemoDistanceUsesNewTestTariff() =>
+        Assert.Equal(184.40m, new FareCalculator(new FareTariff(50m, 42m)).Calculate(3.2m).Amount);
+
+    [Fact]
     public void CalculatesUsingExplicitTariff()
     {
         var result = new FareCalculator(new FareTariff(40m, 12m)).Calculate(2.5m);

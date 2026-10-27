@@ -4,7 +4,7 @@ import {SafeAreaProvider,SafeAreaView} from 'react-native-safe-area-context';
 import {StatusBar} from 'expo-status-bar';
 import * as LocationService from 'expo-location';
 import {HubConnectionBuilder,LogLevel} from '@microsoft/signalr';
-import {Api,API_URL,errorMessage} from './src/api';
+import {Api,ApiError,API_URL,errorMessage} from './src/api';
 import {clearSession,loadSession,saveSession} from './src/session';
 import {canCancel,money,nextStatus,statusText,terminal} from './src/domain';
 import {Button,Card,colors,Field,Notice,styles} from './src/ui';
@@ -16,7 +16,7 @@ function AppContent(){
  const[session,setSession]=useState<Session|null>(null);const sessionRef=useRef<Session|null>(null);
  const[starting,setStarting]=useState(true);const[error,setError]=useState('');const[offline,setOffline]=useState(false);const[working,setWorking]=useState(false);const actionLock=useRef(false);
  const[tab,setTab]=useState<Tab>('home');const[active,setActive]=useState<Ride|null>(null);const[orders,setOrders]=useState<Ride[]>([]);const[history,setHistory]=useState<History>({items:[],page:1,pageSize:20,total:0});
- const[detail,setDetail]=useState<Ride|null>(null);const detailRef=useRef<Ride|null>(null);const[locations,setLocations]=useState<Location[]>([]);const[mode,setMode]=useState<RoutingMode>('Demo');const[realtime,setRealtime]=useState(false);const[refreshing,setRefreshing]=useState(false);
+ const[detail,setDetail]=useState<Ride|null>(null);const detailRef=useRef<Ride|null>(null);const[locations,setLocations]=useState<Location[]>([]);const[routeUnavailable,setRouteUnavailable]=useState(false);const[realtime,setRealtime]=useState(false);const[refreshing,setRefreshing]=useState(false);
  const[pickup,setPickup]=useState<Point|null>(null);const[destination,setDestination]=useState<Point|null>(null);const[editing,setEditing]=useState<'pickup'|'destination'>('pickup');const[search,setSearch]=useState('');const[quote,setQuote]=useState<Quote|null>(null);const confirmationKey=useRef('');
  const[email,setEmail]=useState('');const[password,setPassword]=useState('');const[name,setName]=useState('');const[register,setRegister]=useState(false);const[reason,setReason]=useState('');const[now,setNow]=useState(Date.now());
  const invalidate=useCallback(()=>{sessionRef.current=null;setSession(null);setActive(null);setOrders([]);setDetail(null);detailRef.current=null;setQuote(null);setHistory({items:[],page:1,pageSize:20,total:0});void clearSession().catch(()=>{});},[]);
@@ -35,7 +35,7 @@ function AppContent(){
   finally{refreshingLock.current=false;setRefreshing(false);}
  },[api]);
  useEffect(()=>{let alive=true;void(async()=>{try{const stored=await loadSession();if(stored&&alive){sessionRef.current=stored;setSession(stored);}}catch{if(alive)setError('Не вдалося відкрити захищене сховище. Спробуйте перезапустити застосунок.');}finally{if(alive)setStarting(false);}})();return()=>{alive=false;};},[]);
- useEffect(()=>{if(!session?.accessToken)return;void refresh(true);void Promise.all([api.locations(),api.config()]).then(([places,config])=>{setLocations(places);setMode(config.routingMode);}).catch(e=>setError(errorMessage(e)));},[session?.accessToken,api,refresh]);
+ useEffect(()=>{if(!session?.accessToken)return;void refresh(true);void api.locations().then(setLocations).catch(e=>setError(errorMessage(e)));},[session?.accessToken,api,refresh]);
  useEffect(()=>{if(!session?.accessToken)return;const timer=setInterval(()=>{setNow(Date.now());if(Date.parse(sessionRef.current?.expiresAt??'')<=Date.now()){invalidate();setError('Термін сесії закінчився. Увійдіть знову.');}},1000);const poll=setInterval(()=>{if(AppState.currentState==='active')void refresh();},8000);const subscription=AppState.addEventListener('change',state=>{if(state==='active')void refresh(true);});return()=>{clearInterval(timer);clearInterval(poll);subscription.remove();};},[session?.accessToken,invalidate,refresh]);
  useEffect(()=>{
   if(!session?.accessToken)return;let disposed=false;let connecting=false;
@@ -46,7 +46,11 @@ function AppContent(){
   return()=>{disposed=true;clearInterval(timer);setRealtime(false);void connection.stop();};
  },[session?.accessToken,refresh]);
  async function action(work:()=>Promise<void>){if(actionLock.current)return;actionLock.current=true;setWorking(true);setError('');try{await work();setOffline(false);}catch(e){setError(errorMessage(e));await refresh();}finally{actionLock.current=false;setWorking(false);}}
- function choose(point:Point){if(editing==='pickup'){setPickup(point);setEditing('destination');}else setDestination(point);setQuote(null);confirmationKey.current='';setSearch('');}
+ function choose(point:Point){if(editing==='pickup'){setPickup(point);setEditing('destination');}else setDestination(point);setQuote(null);setRouteUnavailable(false);confirmationKey.current='';setSearch('');}
+ async function requestQuote(start:Point,end:Point,routingMode:RoutingMode){
+  try{const value=await api.quote(start,end,routingMode);setPickup(start);setDestination(end);setQuote(value);setRouteUnavailable(false);confirmationKey.current=`${value.id}-${Date.now()}-${Math.random().toString(36).slice(2)}`;setNow(Date.now());}
+  catch(e){setQuote(null);if(routingMode==='Live'&&e instanceof ApiError&&(e.status===422||e.status===503)){setRouteUnavailable(true);return;}throw e;}
+ }
  function openDetail(ride:Ride){setDetail(ride);detailRef.current=ride;setReason('');}
  const dismissDetail=()=>{setDetail(null);detailRef.current=null;};
  async function locate(){const permission=await LocationService.requestForegroundPermissionsAsync();if(permission.status!=='granted'){setError('Доступ до геолокації не надано. Виберіть місце зі списку або на мапі.');return;}const result=await LocationService.getCurrentPositionAsync({accuracy:LocationService.Accuracy.Balanced});choose({latitude:result.coords.latitude,longitude:result.coords.longitude,address:'Моє місцеперебування'});}
@@ -91,14 +95,14 @@ function AppContent(){
    <Text style={styles.title}>Доступні замовлення</Text>{orders.length===0?<Notice text={user.driverProfile?.available?'Поки немає замовлень. Список оновлюється автоматично.':'Увімкніть доступність, щоб побачити очікувані замовлення.'}/>:orders.map(order=><Card key={order.id}><Text style={styles.title}>{money(order.amount)} · {order.route.distanceKm.toFixed(2)} км</Text><Text style={styles.text}>● {order.pickup.address}</Text><Text style={styles.text}>◆ {order.destination.address}</Text><Text style={styles.muted}>{order.route.isDemo?'Демонстраційна поїздка · ':''}Готівка — демонстрація</Text><Button title="Прийняти замовлення" disabled={working} onPress={()=>action(async()=>{await api.accept(order.id);setReason('');await refresh(true);})}/></Card>)}
   </>:<>
    <Text style={styles.heading}>Куди поїдемо?</Text><Text style={styles.muted}>Виберіть точки на мапі або місця зі списку. Ціну та дорожню відстань визначить сервер.</Text>
-   <View style={styles.row}><View style={{flex:1}}><Button title={mode==='Demo'?'✓ Демомаршрути':'Демомаршрути'} secondary={mode!=='Demo'} onPress={()=>{setMode('Demo');setQuote(null);}}/></View><View style={{flex:1}}><Button title={mode==='Live'?'✓ Живий маршрут':'Живий маршрут'} secondary={mode!=='Live'} onPress={()=>{setMode('Live');setQuote(null);}}/></View></View>
-   <Notice text={mode==='Demo'?'Демонстраційний режим: лише маршрути між відомими місцями Львова. Дані синтетичні, не для реальних поїздок.':'Живий режим: сервер звернеться до налаштованого дорожнього провайдера. При недоступності замовлення не створюється.'}/>
+   <Notice text="Це демонстрація без реальних перевезень і оплат. Для довільних точок дорожній маршрут доступний лише за налаштованого серверного маршрутизатора."/>
    <RideMap pickup={pickup} destination={destination} route={quote?.route} locations={locations} onPick={coordinate=>choose({...coordinate,address:`Точка на мапі (${coordinate.latitude.toFixed(4)}, ${coordinate.longitude.toFixed(4)})`})}/>
    <Card><Button secondary title={`● Подача: ${pickup?.address??'вибрати'}`} onPress={()=>setEditing('pickup')}/><Button secondary title={`◆ Призначення: ${destination?.address??'вибрати'}`} onPress={()=>setEditing('destination')}/><Text style={styles.label}>Зараз вибираємо: {editing==='pickup'?'точку подачі':'призначення'}</Text><Button secondary title="Використати моє місцеперебування" disabled={working} onPress={()=>action(locate)}/><Field label="Знайти серед відомих місць Львова" value={search} onChangeText={setSearch} placeholder="Наприклад: вокзал"/>
     {locations.filter(place=>place.name.toLocaleLowerCase('uk').includes(search.toLocaleLowerCase('uk'))).map(place=><Button key={place.id} secondary title={place.name} onPress={()=>choose({latitude:place.latitude,longitude:place.longitude,address:place.name,locationId:place.id})}/>)}
     {locations.length===0&&<Button secondary title="Завантажити місця" onPress={()=>action(async()=>setLocations(await api.locations()))}/>}
    </Card>
-   <Button title={quote?'Перерахувати маршрут':'Розрахувати маршрут і ціну'} disabled={working||!pickup||!destination||offline} onPress={()=>action(async()=>{const value=await api.quote(pickup!,destination!,mode);setQuote(value);confirmationKey.current=`${value.id}-${Date.now()}-${Math.random().toString(36).slice(2)}`;setNow(Date.now());})}/>
+   <Button title={quote?'Перерахувати маршрут':'Розрахувати маршрут і ціну'} disabled={working||!pickup||!destination||offline} onPress={()=>action(()=>requestQuote(pickup!,destination!,'Live'))}/>
+   {routeUnavailable&&<><Notice text="Дорожній маршрут для цих точок зараз недоступний. Ціну не розраховано. Можна використати демонстраційний маршрут вокзал → Оперний театр."/><Button secondary title="Використати маршрут вокзал → Оперний" disabled={working||offline} onPress={()=>action(async()=>{const station=locations.find(place=>place.id==='station');const opera=locations.find(place=>place.id==='opera');if(!station||!opera){setError('Демонстраційні місця недоступні. Оновіть список місць.');return;}await requestQuote({...station,address:station.name,locationId:station.id},{...opera,address:opera.name,locationId:opera.id},'Demo');})}/></>}
    {quote&&<Card><Text style={styles.title}>Ваша пропозиція</Text><Text style={styles.price}>{money(quote.amount)}</Text><Text style={styles.text}>{quote.route.distanceKm.toFixed(2)} км · ≈ {Math.ceil(quote.route.durationSeconds/60)} хв</Text><Text style={styles.muted}>Готівка — демонстрація · {remaining>0?`Чинна ще ${remaining} с`:'Строк дії закінчився — перерахуйте'}</Text><Button title="Підтвердити замовлення" disabled={working||remaining===0||offline} onPress={()=>action(async()=>{await api.confirm(quote.id,confirmationKey.current);setQuote(null);await refresh(true);})}/></Card>}
   </>}
  </ScrollView></KeyboardAvoidingView>
